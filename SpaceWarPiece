@@ -1,0 +1,145 @@
+piece = function(x,y,type,direction,player,width,height,color,strokeColor){
+	this.x = x;
+	this.y = y;
+	this.type = type;
+	this.direction = direction;
+	this.player = player;
+	this.name = pieceTypes[this.type];
+	this.width = width;
+	this.height = height;
+	this.color = color;
+	this.strokeColor = strokeColor;
+	this.fade = 255;
+	this.collapsing = false;
+	if(this.direction%180 !== 0){
+		this.width = this.height+this.width;
+		this.height = this.width-this.height;
+		this.width = this.width-this.height;
+	}
+}
+piece.prototype.draw = function(primaryFade){
+	translate(this.x,this.y);
+	rotate(this.direction);
+	fill(this.color[0],this.color[1],this.color[2],this.fade*primaryFade);
+	stroke(this.strokeColor[0],this.strokeColor[1],this.strokeColor[2],this.fade*primaryFade);
+	strokeWeight(4);
+	switch(this.type){
+		case 0:
+			rect(-this.width/2,-this.height/2,this.width,this.height);
+		break;
+		case 1:
+			triangle(-this.width/2,-this.height/2,this.width/2,-this.height/2,this.width/2,this.height/2);
+		break;
+		case 2:
+			triangle(-this.width/2,-this.height/2,this.width/2,-this.height/2,0,this.height/2);
+		break;
+		case 3:
+			quad(0,-this.height/2,-this.width/2,0,0,this.height/2,this.width/2,0);
+		break;
+		case 4:
+			beginShape();
+			vertex(-this.width/5,-this.height/2);
+			vertex(this.width/5,-this.height/2);
+			vertex(this.width/2,-this.height/5);
+			vertex(this.width/2,this.height/5);
+			vertex(this.width/5,this.height/2);
+			vertex(-this.width/5,this.height/2);
+			vertex(-this.width/2,this.height/5);
+			vertex(-this.width/2,-this.height/5);
+			endShape(CLOSE);
+		break;
+		case 5:
+			triangle(-this.width/2,-this.height/2*0.875,this.width/2,-this.height/2*0.875,0,this.height/2*0.875);
+		break;
+		case 6:
+			ellipse(0,0,this.width*1.125,this.height*1.125);
+		break;
+		case 7:
+			rect(-this.width/2,-this.height/2,this.width,this.height,(this.width+this.height)/10);
+		break;
+		case 8:
+			arc(-this.width/2,0,this.width*2,this.height*2,-45,45);
+			line(-this.width/2,0,-this.width/2+sqrt(this.width*this.width+this.height*this.height)/2,sqrt(this.width*this.width+this.height*this.height)/2);
+			line(-this.width/2,0,-this.width/2+sqrt(this.width*this.width+this.height*this.height)/2,-sqrt(this.width*this.width+this.height*this.height)/2);
+		break;
+		case 9:
+			strokeWeight(1);
+			for(k=0;k<this.width/12.5;k++){
+				for(l=0;l<this.height/5;l++){
+					rect(-this.width/2+3.75+k*12.5,-this.height/2+l*5,5,5);
+				}
+			}
+		break;
+		case 10:
+			arc(-this.width/2,-this.height/2,this.width*2,this.height*2,0,90);
+			line(-this.width/2,-this.height/2,this.width/2,-this.height/2);
+			line(-this.width/2,-this.height/2,-this.width/2,this.height/2);
+		break;
+	}
+	rotate(-this.direction);
+	translate(-this.x,-this.y);
+}
+piece.prototype.drawSelect = function(){
+	translate(this.x,this.y);
+	rotate(this.direction);
+	switch(this.type){
+		case 0:
+			rect(-this.width/2,-this.height/2,this.width,this.height);
+		break;
+		case 1:
+			triangle(-this.width/2,-this.height/2,this.width/2,-this.height/2,this.width/2,this.height/2);
+		break;
+		case 2:
+			triangle(-this.width/2,-this.height/2,this.width/2,-this.height/2,0,this.height/2);
+		break;
+		case 3:
+			quad(0,-this.height/2,-this.width/2,0,0,this.height/2,this.width/2,0);
+		break;
+		case 4:
+			beginShape();
+			vertex(-this.width/5,-this.height/2);
+			vertex(this.width/5,-this.height/2);
+			vertex(this.width/2,-this.height/5);
+			vertex(this.width/2,this.height/5);
+			vertex(this.width/5,this.height/2);
+			vertex(-this.width/5,this.height/2);
+			vertex(-this.width/2,this.height/5);
+			vertex(-this.width/2,-this.height/5);
+			endShape(CLOSE);
+		break;
+		case 5:
+			triangle(-this.width/2,-this.height/2*0.875,this.width/2,-this.height/2*0.875,0,this.height/2*0.875);
+		break;
+		case 6:
+			ellipse(0,0,this.width*1.125,this.height*1.125);
+		break;
+		case 7:
+			rect(-this.width/2,-this.height/2,this.width,this.height,(this.width+this.height)/10);
+		break;
+		case 8:
+			arc(-this.width/2,0,this.width*2,this.height*2,-45,45);
+			line(-this.width/2,0,-this.width/2+sqrt(this.width*this.width+this.height*this.height)/2,sqrt(this.width*this.width+this.height*this.height)/2);
+			line(-this.width/2,0,-this.width/2+sqrt(this.width*this.width+this.height*this.height)/2,-sqrt(this.width*this.width+this.height*this.height)/2);
+		break;
+		case 9:
+			strokeWeight(1);
+			for(k=0;k<this.width/12.5;k++){
+				for(l=0;l<this.height/5;l++){
+					rect(-this.width/2+3.75+k*12.5,-this.height/2+l*5,5,5);
+				}
+			}
+		break;
+		case 10:
+			line(-this.width/2,-this.height/2,this.width/2,-this.height/2);
+			line(-this.width/2,-this.height/2,-this.width/2,this.height/2);
+			arc(-this.width/2,-this.height/2,this.width*2,this.height*2,0,90);
+		break;
+	}
+	rotate(-this.direction);
+	translate(-this.x,-this.y);
+}
+piece.prototype.update = function(){
+	if(this.collapsing){
+		this.fade-=17;
+	}
+}

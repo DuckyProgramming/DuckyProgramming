@@ -1,0 +1,8 @@
+preload = function(){
+	imageHold = [0,loadImage('P f random.png'),loadImage('N f random.png'),loadImage('B f random.png'),loadImage('R f random.png'),loadImage('NB b random.png'),loadImage('Q f random.png'),loadImage('K f random.png'),loadImage('A f random.png'),loadImage('W f random.png'),loadImage('Z f random.png'),loadImage('WA f random.png'),loadImage('CNB b random.png'),0,0,0,0,0,0,0,0,loadImage('P b random.png'),loadImage('N b random.png'),loadImage('B b random.png'),loadImage('R b random.png'),loadImage('NB f random.png'),loadImage('Q b random.png'),loadImage('K b random.png'),loadImage('A b random.png'),loadImage('W b random.png'),loadImage('Z b random.png'),loadImage('WA b random.png'),loadImage('CNB f random.png')];
+}
+setup = function(){
+	createCanvas(660,600);
+	imageMode(CENTER);
+	textAlign(CENTER,CENTER);
+}

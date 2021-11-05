@@ -1,0 +1,1465 @@
+weapon = function(x,y,type,team,direction,player,color,strokeColor,level,variable1){
+	this.x = x;
+	this.y = y;
+	this.type = type;
+	this.team = team;
+	this.startDirection = direction;
+	this.direction = direction;
+	this.player = player;
+	this.color = color;
+	this.strokeColor = strokeColor;
+	this.level = level;
+	this.variable1 = variable1;
+	this.name = weaponTypes[this.type].name;
+	this.width = weaponTypes[this.type].width;
+	this.height = weaponTypes[this.type].height;
+	this.reload = weaponTypes[this.type].reload;
+	this.recoil = weaponTypes[this.type].recoil;
+	this.cycle = weaponTypes[this.type].cycle;
+	this.error = weaponTypes[this.type].error;
+	this.cycleSet = weaponTypes[this.type].cycleSet;
+	this.behaviour = weaponTypes[this.type].behaviour;
+	this.projectileType = weaponTypes[this.type].projectileType;
+	this.shotCount = 0;
+	this.reloadTimer = this.reload;
+	this.attackCycle = false;
+	this.fade = 255;
+	this.jamTimer = 0;
+	this.collapsing = false;
+	this.countingTime = 0;
+	this.recoilBack = [];
+	this.recoilTimer = [];
+	for(k=0;k<this.cycle;k++){
+		this.recoilBack.push(0);
+		this.recoilTimer.push(0);
+	}
+}
+weapon.prototype.draw = function(primaryFade,unique){
+	translate(this.x,this.y);
+	rotate(this.direction);
+	switch(this.name){
+		case "Basic\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-5,-18+this.recoilBack[0],10,14);
+			ellipse(0,0,20,20);
+		break;
+		case "Basic\nCannon":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-5,-18+this.recoilBack[0],10,14-this.recoilBack[0]);
+			rect(-10,-4,20,8);
+		break;
+		case "Sniper\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-5,-24+this.recoilBack[0],10,13);
+			quad(-5,-11+this.recoilBack[0],5,-11+this.recoilBack[0],10,0,-10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Pounder\nTurret":
+			if(unique === 2){
+				fill(185.59375,176.03125,29.40625,this.fade*primaryFade);
+				stroke(165.59375,156.03125,19.40625,this.fade*primaryFade);
+			}
+			else{
+				fill(120,this.fade*primaryFade);
+				stroke(100,this.fade*primaryFade);
+			}
+			strokeWeight(4);
+			rect(-7,-18+this.recoilBack[0],14,14);
+			ellipse(0,0,20,20);
+		break;
+		case "Pelleter\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(3);
+			rect(-5,-17+this.recoilBack[0],3,6-this.recoilBack[0]);
+			rect(2,-17+this.recoilBack[1],3,6-this.recoilBack[1]);
+			quad(-5,-11,5,-11,10,0,-10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Barrier\nLauncher":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(3);
+			strokeJoin(ROUND);
+			quad(-9,-17+this.recoilBack[0],9,-17+this.recoilBack[0],11,-22+this.recoilBack[0],-11,-22+this.recoilBack[0]);
+			strokeJoin(BEVEL);
+			rect(-9,-17+this.recoilBack[0],18,13);
+			strokeWeight(4);
+			ellipse(0,0,20,20);
+		break;
+		case "Dual\nBarrier\nLauncher":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(3);
+			strokeJoin(ROUND);
+			rotate(-45);
+			quad(-5,-14+this.recoilBack[0],5,-14+this.recoilBack[0],6,-18+this.recoilBack[0],-6,-18+this.recoilBack[0]);
+			rotate(90);
+			quad(-5,-14+this.recoilBack[0],5,-14+this.recoilBack[0],6,-18+this.recoilBack[0],-6,-18+this.recoilBack[0]);
+			strokeJoin(BEVEL);
+			rect(-5,-14+this.recoilBack[0],10,10);
+			rotate(-90);
+			rect(-5,-14+this.recoilBack[0],10,10);
+			rotate(45);
+			strokeWeight(4);
+			ellipse(0,0,20,20);
+		break;
+		case "Missile\nLauncher\nMk.I":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			ellipse(0,0,27,27);
+			rect(-12,-16+this.recoilBack[0],24,32);
+			rect(-9,-20+this.recoilBack[0],18,4);
+			ellipse(0,-7+this.recoilBack[0],8,8);
+			ellipse(0,7+this.recoilBack[0],8,8);
+		break;
+		case "Missile\nLauncher\nMk.II":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			ellipse(0,0,39,39);
+			rect(-24,-13+this.recoilBack[1],12,26);
+			rect(12,-13+this.recoilBack[2],12,26);
+			ellipse(-14,this.recoilBack[1],8,8);
+			ellipse(14,this.recoilBack[2],8,8);
+			rect(-21,-17+this.recoilBack[1],12,4);
+			rect(9,-17+this.recoilBack[2],12,4);
+			rect(-12,-16+this.recoilBack[0],24,32);
+			rect(-9,-20+this.recoilBack[0],18,4);
+			ellipse(0,-7+this.recoilBack[0],8,8);
+			ellipse(0,7+this.recoilBack[0],8,8);
+		break;
+		case "Missile\nLauncher\nMk.III":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			ellipse(0,0,39,39);
+			for(k=0;k<3;k++){
+				rect(-24,-21+this.recoilBack[1+k*3]+k*8,12,26);
+				rect(12,-21+this.recoilBack[2+k*3]+k*8,12,26);
+				ellipse(-14,-8+this.recoilBack[1+k*3]+k*8,8,8);
+				ellipse(14,-8+this.recoilBack[2+k*3]+k*8,8,8);
+				rect(-21,-25+this.recoilBack[1+k*3]+k*8,12,4);
+				rect(9,-25+this.recoilBack[2+k*3]+k*8,12,4);
+				rect(-12,-24+this.recoilBack[k*3]+k*8,24,32);
+				rect(-9,-28+this.recoilBack[k*3]+k*8,18,4);
+				ellipse(0,-15+this.recoilBack[k*3]+k*8,8,8);
+				ellipse(0,-1+this.recoilBack[k*3]+k*8,8,8);
+				if(k === 0){
+					translate(-2,0);
+				}
+				else if(k === 1){
+					translate(4,0);
+				}
+				else if(k === 2){
+					translate(-2,0);
+				}
+			}
+		break;
+		case "Streamer\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(2);
+			for(k=0;k<4;k++){
+				rect(-5,-27+k*3+this.recoilBack[k],10,14);
+			}
+			strokeWeight(4);
+			ellipse(0,0,20,20);
+		break;
+		case "Silo\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(2);
+			for(k=0;k<4;k++){
+				rect(-5,-33+k*3+this.recoilBack[k],10,14);
+			}
+			strokeWeight(4);
+			quad(-5,-11+this.recoilBack[0],5,-11+this.recoilBack[0],10,0,-10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Shotgun\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			quad(-5,-18+this.recoilBack[0],5,-18+this.recoilBack[0],9,-4+this.recoilBack[0],-9,-4+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Swarm\nDrone\nSpawner":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			quad(-4,-16+this.recoilBack[0],4,-16+this.recoilBack[0],6,-4+this.recoilBack[0],-6,-4+this.recoilBack[0]);
+			rect(-10,-4,20,8);
+		break;
+		case "Carrier\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rotate(-45);
+			quad(-4,-16+this.recoilBack[0],4,-16+this.recoilBack[0],6,-4+this.recoilBack[0],-6,-4+this.recoilBack[0]);
+			rotate(90);
+			quad(-4,-16+this.recoilBack[2],4,-16+this.recoilBack[2],6,-4+this.recoilBack[2],-6,-4+this.recoilBack[2]);
+			rotate(-45);
+			quad(-4,-16+this.recoilBack[1],4,-16+this.recoilBack[1],6,-4+this.recoilBack[1],-6,-4+this.recoilBack[1]);
+			ellipse(0,0,20,20);
+		break;
+		case "Defense\nLauncher":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			strokeJoin(ROUND);
+			quad(-8,-11+this.recoilBack[0],8,-11+this.recoilBack[0],12,-18+this.recoilBack[0],-12,-18+this.recoilBack[0]);
+			strokeJoin(BEVEL);
+			rect(-8,-11+this.recoilBack[0],16,7-this.recoilBack[0]);
+			rect(-10,-4,20,8);
+		break;
+		case "Small\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-3,-15+this.recoilBack[0],6,11);
+			ellipse(0,0,20,20);
+		break;
+		case "Destroyer\nCannon":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-15,-30+this.recoilBack[0],30,22-this.recoilBack[0]);
+			rect(-20,-8,40,16);
+			triangle(-15,8,15,8,0,16);
+		break;
+		case "Gunner\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(2);
+			rect(-4,-17+this.recoilBack[0],3,6-this.recoilBack[0]);
+			rect(1,-17+this.recoilBack[1],3,6-this.recoilBack[1]);
+			rect(-9,-14+this.recoilBack[2],3,8-this.recoilBack[2]);
+			rect(6,-14+this.recoilBack[3],3,8-this.recoilBack[3]);
+			quad(-5,-11,5,-11,10,0,-10,0);
+			strokeWeight(3);
+			ellipse(0,0,20,20);
+		break;
+		case "Liner\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-7.5,-18+this.recoilBack[0],15,14);
+			strokeWeight(3);
+			quad(-7,-18+this.recoilBack[0],7,-18+this.recoilBack[0],3,-22+this.recoilBack[0],-3,-22+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Catapult\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-9,-18+this.recoilBack[0],18,14);
+			strokeWeight(3);
+			quad(-8,-18+this.recoilBack[0],8,-18+this.recoilBack[0],4,-22+this.recoilBack[0],-4,-22+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Quadratic\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-9,-18+this.recoilBack[0],18,14);
+			strokeWeight(3);
+			quad(-8,-18+this.recoilBack[0],8,-18+this.recoilBack[0],4,-22+this.recoilBack[0],-4,-22+this.recoilBack[0]);
+			triangle(-5,-22+this.recoilBack[0],-1,-22+this.recoilBack[0],-3,-24+this.recoilBack[0]);
+			triangle(1,-22+this.recoilBack[0],5,-22+this.recoilBack[0],3,-24+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Triple\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rotate(-45);
+			rect(-5,-18+this.recoilBack[0],10,14);
+			rotate(90);
+			rect(-5,-18+this.recoilBack[0],10,14);
+			rotate(-45);
+			rect(-5,-18+this.recoilBack[0],10,14);
+			ellipse(0,0,20,20);
+		break;
+		case "String\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-5,-18+this.recoilBack[0],10,14);
+			quad(0,-8,14,0,0,8,-14,0);
+			quad(0,-14,8,0,0,14,-8,0);
+			ellipse(-9,8,10,10);
+			ellipse(9,8,10,10);
+			ellipse(0,0,20,20);
+		break;
+		case "Drone\nSpawner":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			quad(-20,-16+this.recoilBack[0],20,-16+this.recoilBack[0],12,-4+this.recoilBack[0],-12,-4+this.recoilBack[0]);
+			rect(-16,-4,32,8);
+		break;
+		case "Sandwich\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-9,-15+this.recoilBack[0]+this.recoilBack[1]+this.recoilBack[2],18,12);
+			rect(-7,-18+this.recoilBack[0],14,14);
+			ellipse(0,0,20,20);
+		break;
+		case "Minion\nSpawner":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-9,-10+this.recoilBack[0],18,6-this.recoilBack[0]);
+			rect(-12,-16+this.recoilBack[0],24,6);
+			rect(-12,-4,24,8);
+		break;
+		case "Migrator\nLauncher":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(3);
+			strokeJoin(ROUND);
+			quad(-9,-17+this.recoilBack[0],9,-17+this.recoilBack[0],11,-22+this.recoilBack[0],-11,-22+this.recoilBack[0]);
+			strokeJoin(BEVEL);
+			quad(-7,8,7,8,4,14,-4,14);
+			rect(-9,-17+this.recoilBack[0],18,13);
+			strokeWeight(4);
+			ellipse(0,0,20,20);
+		break;
+		case "Repositioner\nLauncher":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(3);
+			strokeJoin(ROUND);
+			quad(-9,-17+this.recoilBack[0],9,-17+this.recoilBack[0],11,-22+this.recoilBack[0],-11,-22+this.recoilBack[0]);
+			strokeJoin(BEVEL);
+			rect(-8,14,16,3);
+			quad(-7,8,7,8,4,14,-4,14);
+			rect(-9,-17+this.recoilBack[0],18,13);
+			rect(-9,5,18,6);
+			strokeWeight(4);
+			ellipse(0,0,20,20);
+		break;
+		case "Heavy\nMinion\nSpawner":
+			fill(60,this.fade*primaryFade);
+			stroke(60,this.fade*primaryFade);
+			strokeWeight(4);
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			rect(-18,-14+this.recoilBack[0],36,7-this.recoilBack[0]);
+			rect(-24,-21+this.recoilBack[0],48,7);
+			rect(-24,-7,48,14);
+		break;
+		case "Bonker":
+			fill(60,this.fade*primaryFade);
+			stroke(50,this.fade*primaryFade);
+			strokeWeight(2);
+			beginShape();
+			for(k=0;k<6;k++){
+				vertex(sin(k*60+this.countingTime*2)*18,cos(k*60+this.countingTime*2)*18);
+			}
+			endShape(CLOSE);
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			ellipse(0,0,24,24);
+		break;
+		case "Single\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-7,-28+this.recoilBack[0],14,10);
+			quad(-7,-18+this.recoilBack[0],7,-18+this.recoilBack[0],14,0,-14,0);
+			ellipse(0,0,28,28);
+		break;
+		case "Destroyer\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-15,-34+this.recoilBack[0],30,22-this.recoilBack[0]);
+			ellipse(0,0,40,40);
+		break;
+		case "Rotator\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-5,-34+this.recoilBack[0],10,10);
+			quad(-5,-24+this.recoilBack[0],0,-24+this.recoilBack[0],-7,0,-12,0);
+			quad(5,-24+this.recoilBack[0],0,-24+this.recoilBack[0],7,0,12,0);
+			ellipse(0,0,24,24);
+		break;
+		case "Engine\nBreaker\nTurret": case "Jamming\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-5,-18+this.recoilBack[0],10,14);
+			ellipse(0,0,20,20);
+			noStroke();
+			if(this.name === "Jamming\nTurret"){
+				fill(255,140,0,this.fade*primaryFade);
+			}
+			else{
+				fill(120,200,200,this.fade*primaryFade);
+			}
+			ellipse(0,0,12,12);
+		break;
+		case "5-Spread\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rotate(-45);
+			rect(-4,-20+this.recoilBack[0],8,14);
+			rotate(90);
+			rect(-4,-20+this.recoilBack[0],8,14);
+			rotate(-22.5);
+			rect(-4,-20+this.recoilBack[0],8,14);
+			rotate(-45);
+			rect(-4,-20+this.recoilBack[0],8,14);
+			rotate(22.5);
+			rect(-4,-20+this.recoilBack[0],8,14);
+			ellipse(0,0,24,24);
+		break;
+		case "Sapper\nDrone\nSpawner":
+			if(this.countingTime*8%360>=90&&this.countingTime*8%360<270){
+				fill(200,200,0,this.fade*primaryFade);
+				stroke(175,175,0,this.fade*primaryFade);
+				strokeWeight(2);
+				ellipse(sin(this.countingTime*8)*15,-8,6,6);
+			}
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-2,-12+this.recoilBack[0],4,8-this.recoilBack[0]);
+			quad(-15,-20+this.recoilBack[0],-9,-20+this.recoilBack[0],0,-4+this.recoilBack[0],-6,-4+this.recoilBack[0]);
+			quad(15,-20+this.recoilBack[0],9,-20+this.recoilBack[0],0,-4+this.recoilBack[0],6,-4+this.recoilBack[0]);
+			rect(-10,-4,20,8);
+			if(this.countingTime*8%360<90||this.countingTime*8%360>=270){
+				fill(200,200,0,this.fade*primaryFade);
+				stroke(175,175,0,this.fade*primaryFade);
+				strokeWeight(2);
+				ellipse(sin(this.countingTime*8)*15,-8,6,6);
+			}
+		break;
+		case "5-Parellel\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			triangle(-18,-4,18,-4,0,12);
+			rect(8,-17+this.recoilBack[0],8,13-this.recoilBack[0]);
+			rect(-16,-17+this.recoilBack[0],8,13-this.recoilBack[0]);
+			rect(2,-18+this.recoilBack[0],8,14-this.recoilBack[0]);
+			rect(-10,-18+this.recoilBack[0],8,14-this.recoilBack[0]);
+			rect(-4,-20+this.recoilBack[0],8,14);
+			ellipse(0,0,24,24);
+		break;
+		case "Wiper\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-7.5,-18+this.recoilBack[0],15,14);
+			rect(-8,-10,16,10);
+			strokeWeight(3);
+			quad(-7,-18+this.recoilBack[0],7,-18+this.recoilBack[0],3,-22+this.recoilBack[0],-3,-22+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Projectile\nFlak":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			quad(-9,-15+this.recoilBack[0],9,-15+this.recoilBack[0],6,-5,-6,-5);
+			triangle(-8,0,0,8,-11,11);
+			triangle(8,0,0,8,11,11);
+			ellipse(0,0,20,20);
+		break;
+		case "Bulldozer\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-8,-38+this.recoilBack[0],16,20-this.recoilBack[0]);
+			quad(-8,-18,8,-18,6,0,-6,0);
+			ellipse(0,0,24,24);
+		break;
+		case "Assasin\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-5,-30+this.recoilBack[0],10,15);
+			quad(-5,-15+this.recoilBack[0],5,-15+this.recoilBack[0],10,0,-10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Airscrew\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(3);
+			rect(-5,-19+this.recoilBack[0],3,4-this.recoilBack[0]);
+			rect(2,-19+this.recoilBack[1],3,4-this.recoilBack[1]);
+			quad(-5,-15,5,-15,10,0,-10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Ferreter\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-11,-18+this.recoilBack[1],10,14);
+			rect(1,-18+this.recoilBack[2],10,14);
+			rect(-5,-20+this.recoilBack[0],10,14);
+			rect(-3,-23+this.recoilBack[0],6,3);
+			rect(-9,-21+this.recoilBack[1],6,3);
+			rect(3,-21+this.recoilBack[2],6,3);
+			ellipse(0,0,24,24);
+		break;
+		case "Decisive\nSpawner":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-9,-10+this.recoilBack[0],18,6-this.recoilBack[0]);
+			rect(-12,-22+this.recoilBack[0],24,12);
+			quad(-12,-10+this.recoilBack[0],12,-10+this.recoilBack[0],16,-17+this.recoilBack[0],-16,-17+this.recoilBack[0]);
+			rect(-12,-4,24,8);
+		break;
+		case "Dual\nMachine\nPounder":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-13,-32+this.recoilBack[0],12,12-this.recoilBack[0]);
+			rect(1,-32+this.recoilBack[1],12,12-this.recoilBack[1]);
+			quad(-13,-20,13,-20,16,0,-16,0);
+			ellipse(0,0,32,32);
+		break;
+		case "Impact\nShield":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			ellipse(0,0,18,18);
+			ellipse(-10,-10,9,9);
+			ellipse(10,-10,9,9);
+			ellipse(10,10,9,9);
+			ellipse(-10,10,9,9);
+		break;
+		case "Twin\nSpawner":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-30,-20+this.recoilBack[0],60,12-this.recoilBack[0]);
+			rect(-36,-32+this.recoilBack[0],72,12);
+			rect(-36,-8,72,16);
+		break;
+		case "Interceptor\nSpawner":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-27,-23+this.recoilBack[0],54,14-this.recoilBack[0]);
+			rect(-32,-37+this.recoilBack[0],64,14);
+			rect(-32,-9,64,18);
+		break;
+		case "Darter\nSpawner":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-25,-20+this.recoilBack[0],50,12-this.recoilBack[0]);
+			rect(-30,-32+this.recoilBack[0],60,12);
+			rect(-30,-8,60,16);
+		break;
+		case "Burst\nThrower":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			quad(-10,-21+this.recoilBack[1],10,-21+this.recoilBack[1],6,-5,-6,-5);
+			quad(-10,-15+this.recoilBack[0],10,-15+this.recoilBack[0],6,-5,-6,-5);
+			ellipse(0,0,20,20);
+			noStroke();
+			fill(255,50,50,this.fade*primaryFade);
+			ellipse(0,0,12,12);
+		break;
+		case "Octo\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			for(k=0;k<8;k++){
+				rect(-5,-20+this.recoilBack[0],10,14);
+				rotate(45);
+			}
+			ellipse(0,0,24,24);
+		break;
+		case "Missile\nMine\nPod":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			ellipse(0,0,18,18);
+			strokeWeight(3);
+			for(k=0;k<6;k++){
+				ellipse(0,12,8,8);
+				line(0,16,0,18);
+				rotate(60);
+			}
+		break;
+		case "SDU\nTurret":
+			fill(60,this.fade*primaryFade);
+			stroke(50,this.fade*primaryFade);
+			strokeWeight(2);
+			rotate(-this.direction+this.countingTime*5);
+			for(k=0;k<5;k++){
+				triangle(-8,0,8,0,0,20);
+				rotate(72);
+			}
+			rotate(this.direction-this.countingTime*5);
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(3);
+			rect(-5,-24+this.recoilBack[0],10,14);
+			rect(-5,-21+this.recoilBack[1],10,14);
+			rect(-5,-18+this.recoilBack[2],10,14);
+			strokeWeight(4);
+			ellipse(0,0,20,20);
+		break;
+		case "Close\nOrbital\nMissiles":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-2,-9+this.recoilBack[0],4,6-this.recoilBack[0]);
+			quad(-12,-15+this.recoilBack[0],-6,-15+this.recoilBack[0],0,-3+this.recoilBack[0],-6,-3+this.recoilBack[0]);
+			quad(12,-15+this.recoilBack[0],6,-15+this.recoilBack[0],0,-3+this.recoilBack[0],6,-3+this.recoilBack[0]);
+			rect(-10,-3,20,6);
+		break;
+		case "Far\nOrbital\nMissiles":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-2,-13+this.recoilBack[0],4,10-this.recoilBack[0]);
+			quad(-12,-15+this.recoilBack[0],-6,-15+this.recoilBack[0],0,-3+this.recoilBack[0],-6,-3+this.recoilBack[0]);
+			quad(12,-15+this.recoilBack[0],6,-15+this.recoilBack[0],0,-3+this.recoilBack[0],6,-3+this.recoilBack[0]);
+			rect(-10,-3,20,6);
+		break;
+		case "Swarm\nDrone\nHolder":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			ellipse(0,0,60,60);
+			triangle(-15,9,15,9,0,-18);
+		break;
+		case "Lightning\nDrone\nSpawner":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			quad(-15,-24+this.recoilBack[1],15,-24+this.recoilBack[1],9,-12+this.recoilBack[1],-9,-12+this.recoilBack[1]);
+			quad(-15,-16+this.recoilBack[0],15,-16+this.recoilBack[0],9,-4+this.recoilBack[0],-9,-4+this.recoilBack[0]);
+			rect(-12,-4,24,8);
+		break;
+		case "Machine\nCannon":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			quad(-12,-20+this.recoilBack[0],12,-20+this.recoilBack[0],8,-4+this.recoilBack[0],-8,-4+this.recoilBack[0]);
+			rect(-11,-4,22,8);
+		break;
+		case "Smasher":
+			fill(60,this.fade*primaryFade);
+			stroke(50,this.fade*primaryFade);
+			strokeWeight(2);
+			rotate(this.countingTime*2);
+			beginShape();
+			for(k=0;k<6;k++){
+				triangle(-10,0,10,0,0,-25);
+				rotate(60);
+				vertex(sin(k*60+30)*22,cos(k*60+30)*22);
+			}
+			endShape(CLOSE);
+			rotate(this.countingTime*-2);
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			ellipse(0,0,30,30);
+		break;
+		case "Hybrid\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			rect(-7,-18+this.recoilBack[0],14,14);
+			quad(-9,15-this.recoilBack[0],9,15-this.recoilBack[0],6,4-this.recoilBack[0],-6,4-this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Multistack\nTurret":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(3);
+			rect(-4,-26+this.recoilBack[0],8,4);
+			rect(-5.5,-22+this.recoilBack[0],11,4);
+			strokeWeight(4);
+			rect(-7,-18+this.recoilBack[0],14,14);
+			ellipse(0,0,20,20);
+		break;
+		case "Chain\nCannon":
+			fill(120,this.fade*primaryFade);
+			stroke(100,this.fade*primaryFade);
+			strokeWeight(4);
+			quad(-12,-30+this.recoilBack[0],12,-30+this.recoilBack[0],8,-4+this.recoilBack[0],-8,-4+this.recoilBack[0]);
+			rect(-11,-4,22,8);
+		break;
+	}
+	rotate(-this.direction);
+	translate(-this.x,-this.y);
+}
+weapon.prototype.drawSelect = function(){
+	translate(this.x,this.y);
+	rotate(this.direction);
+	switch(this.name){
+		case "Basic\nTurret": case "Engine\nBreaker\nTurret": case "Jamming\nTurret":
+			line(-5,-18+this.recoilBack[0],5,-18+this.recoilBack[0]);
+			line(-5,-18+this.recoilBack[0],-5,-9);
+			line(5,-18+this.recoilBack[0],5,-9);
+			ellipse(0,0,20,20);
+		break;
+		case "Basic\nCannon":
+			rect(-5,-18+this.recoilBack[0],10,14-this.recoilBack[0]);
+			rect(-10,-4,20,8);
+		break;
+		case "Sniper\nTurret":
+			rect(-5,-24+this.recoilBack[0],10,13);
+			line(-5,-11+this.recoilBack[0],5,-11+this.recoilBack[0])
+			line(5,-11+this.recoilBack[0],10,0);
+			line(-5,-11+this.recoilBack[0],-10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Pounder\nTurret":
+			line(-7,-18+this.recoilBack[0],7,-18+this.recoilBack[0]);
+			line(-7,-18+this.recoilBack[0],-7,-8);
+			line(7,-18+this.recoilBack[0],7,-8);
+			ellipse(0,0,20,20);
+		break;
+		case "Pelleter\nTurret":
+			rect(-5,-17+this.recoilBack[0],3,6-this.recoilBack[0]);
+			rect(2,-17+this.recoilBack[1],3,6-this.recoilBack[1]);
+			line(-5,-11,5,-11);
+			line(5,-11,10,0);
+			line(-5,-11,-10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Barrier\nLauncher":
+			strokeJoin(ROUND);
+			quad(-9,-17+this.recoilBack[0],9,-17+this.recoilBack[0],11,-22+this.recoilBack[0],-11,-22+this.recoilBack[0]);
+			strokeJoin(BEVEL);
+			line(-9,-17+this.recoilBack[0],-9,-6+this.recoilBack[0]);
+			line(9,-17+this.recoilBack[0],9,-6+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Dual\nBarrier\nLauncher":
+			strokeJoin(ROUND);
+			rotate(-45);
+			quad(-5,-14+this.recoilBack[0],5,-14+this.recoilBack[0],6,-18+this.recoilBack[0],-6,-18+this.recoilBack[0]);
+			rotate(90);
+			quad(-5,-14+this.recoilBack[0],5,-14+this.recoilBack[0],6,-18+this.recoilBack[0],-6,-18+this.recoilBack[0]);
+			strokeJoin(BEVEL);
+			line(-5,-14+this.recoilBack[0],-5,-10);
+			line(5,-14+this.recoilBack[0],5,-10);
+			rotate(-90);
+			line(-5,-14+this.recoilBack[0],-5,-10);
+			line(5,-14+this.recoilBack[0],5,-10);
+			rotate(45);
+			ellipse(0,0,20,20);
+		break;
+		case "Missile\nLauncher\nMk.I":
+			rect(-12,-16+this.recoilBack[0],24,32);
+			rect(-9,-20+this.recoilBack[0],18,4);
+			ellipse(0,-7+this.recoilBack[0],8,8);
+			ellipse(0,7+this.recoilBack[0],8,8);
+		break;
+		case "Missile\nLauncher\nMk.II":
+			rect(-24,-13+this.recoilBack[1],12,26);
+			rect(12,-13+this.recoilBack[2],12,26);
+			arc(-14,this.recoilBack[1],8,8,90,270);
+			arc(14,this.recoilBack[2],8,8,-90,90);
+			rect(-21,-17+this.recoilBack[1],9,4);
+			rect(12,-17+this.recoilBack[2],9,4);
+			rect(-12,-16+this.recoilBack[0],24,32);
+			rect(-9,-20+this.recoilBack[0],18,4);
+			ellipse(0,-7+this.recoilBack[0],8,8);
+			ellipse(0,7+this.recoilBack[0],8,8);
+		break;
+		case "Missile\nLauncher\nMk.III":
+			for(k=0;k<3;k++){
+				rect(-24,-21+this.recoilBack[1+k*3]+k*8,12,26);
+				rect(12,-21+this.recoilBack[2+k*3]+k*8,12,26);
+				arc(-14,-8+this.recoilBack[1+k*3]+k*8,8,8,90,270);
+				arc(14,-8+this.recoilBack[2+k*3]+k*8,8,8,-90,90);
+				rect(-21,-25+this.recoilBack[1+k*3]+k*8,9,4);
+				rect(12,-25+this.recoilBack[2+k*3]+k*8,9,4);
+				rect(-12,-24+this.recoilBack[k*3]+k*8,24,32);
+				rect(-9,-28+this.recoilBack[k*3]+k*8,18,4);
+				ellipse(0,-15+this.recoilBack[k*3]+k*8,8,8);
+				ellipse(0,-1+this.recoilBack[k*3]+k*8,8,8);
+				if(k === 0){
+					translate(-2,0);
+				}
+				else if(k === 1){
+					translate(4,0);
+				}
+				else if(k === 2){
+					translate(-2,0);
+				}
+			}
+		break;
+		case "Streamer\nTurret":
+			for(k=0;k<4;k++){
+				line(-5,-27+k*3+thks.recoklBack[k],5,-27+k*3+thks.recoklBack[k]);
+				line(-5,-27+k*3+thks.recoklBack[k],-5,-9);
+				line(5,-27+k*3+thks.recoklBack[k],5,-9);
+			}
+			ellkpse(0,0,20,20);
+		break;
+		case "Silo\nTurret":
+			for(k=0;k<4;k++){
+				rect(-5,-33+k*3+thks.recoklBack[k],10,22-thks.recoklBack[k]-k*3);
+			}
+			line(-5,-11+this.recoilBack[0],5,-11+this.recoilBack[0])
+			line(5,-11+this.recoilBack[0],10,0);
+			line(-5,-11+this.recoilBack[0],-10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Shotgun\nTurret":
+			line(-5,-18+this.recoilBack[0],5,-18+this.recoilBack[0]);
+			line(-5,-18+this.recoilBack[0],-9,-4+this.recoilBack[0]);
+			line(5,-18+this.recoilBack[0],9,-4+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Swarm\nDrone\nSpawner":
+			line(-4,-16+this.recoilBack[0],4,-16+this.recoilBack[0]);
+			line(-4,-16+this.recoilBack[0],-6,-4);
+			line(4,-16+this.recoilBack[0],6,-4);
+			rect(-10,-4,20,8);
+		break;
+		case "Carrier\nTurret":
+			rotate(-45);
+			line(-4,-16+this.recoilBack[0],4,-16+this.recoilBack[0]);
+			line(-4,-16+this.recoilBack[0],-5,-9);
+			line(4,-16+this.recoilBack[0],5,-9);
+			rotate(90);
+			line(-4,-16+this.recoilBack[2],4,-16+this.recoilBack[2]);
+			line(-4,-16+this.recoilBack[2],-5,-9);
+			line(4,-16+this.recoilBack[2],5,-9);
+			rotate(-45);
+			line(-4,-16+this.recoilBack[1],4,-16+this.recoilBack[1]);
+			line(-4,-16+this.recoilBack[1],-5,-9);
+			line(4,-16+this.recoilBack[1],5,-9);
+			ellipse(0,0,20,20);
+		break;
+		case "Defense\nLauncher":
+			strokeJoin(ROUND);
+			quad(-8,-11+this.recoilBack[0],8,-11+this.recoilBack[0],12,-18+this.recoilBack[0],-12,-18+this.recoilBack[0]);
+			strokeJoin(BEVEL);
+			rect(-8,-11+this.recoilBack[0],16,7-this.recoilBack[0]);
+			rect(-10,-4,20,8);
+		break;
+		case "Small\nTurret":
+			line(-3,-15+this.recoilBack[0],3,-15+this.recoilBack[0]);
+			line(-3,-15+this.recoilBack[0],-3,-10);
+			line(3,-15+this.recoilBack[0],3,-10);
+			ellipse(0,0,20,20);
+		break;
+		case "Destroyer\nCannon":
+			rect(-15,-30+this.recoilBack[0],30,22-this.recoilBack[0]);
+			rect(-20,-8,40,16);
+			triangle(-15,8,15,8,0,16);
+		break;
+		case "Gunner\nTurret":
+			rect(-4,-17+this.recoilBack[0],3,6-this.recoilBack[0]);
+			rect(1,-17+this.recoilBack[1],3,6-this.recoilBack[1]);
+			rect(-9,-14+this.recoilBack[2],3,8-this.recoilBack[2]);
+			rect(6,-14+this.recoilBack[3],3,8-this.recoilBack[3]);
+			line(-5,-11,5,-11);
+			line(5,-11,10,0);
+			line(-5,-11,-10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Liner\nTurret":
+			line(-7.5,-18+this.recoilBack[0],7.5,-18+this.recoilBack[0]);
+			line(-7.5,-18+this.recoilBack[0],-7.5,-8);
+			line(7.5,-18+this.recoilBack[0],7.5,-8);
+			quad(-7,-18+this.recoilBack[0],7,-18+this.recoilBack[0],3,-22+this.recoilBack[0],-3,-22+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Catapult\nTurret":
+			line(-9,-18+this.recoilBack[0],9,-18+this.recoilBack[0]);
+			line(-9,-18+this.recoilBack[0],-9,-6);
+			line(9,-18+this.recoilBack[0],9,-6);
+			quad(-8,-18+this.recoilBack[0],8,-18+this.recoilBack[0],4,-22+this.recoilBack[0],-4,-22+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Quadratic\nTurret":
+			line(-9,-18+this.recoilBack[0],9,-18+this.recoilBack[0]);
+			line(-9,-18+this.recoilBack[0],-9,-6);
+			line(9,-18+this.recoilBack[0],9,-6);
+			quad(-8,-18+this.recoilBack[0],8,-18+this.recoilBack[0],4,-22+this.recoilBack[0],-4,-22+this.recoilBack[0]);
+			triangle(-5,-22+this.recoilBack[0],-1,-22+this.recoilBack[0],-3,-24+this.recoilBack[0]);
+			triangle(1,-22+this.recoilBack[0],5,-22+this.recoilBack[0],3,-24+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Triple\nTurret":
+			rotate(-45);
+			line(-5,-18+this.recoilBack[0],5,-18+this.recoilBack[0]);
+			line(-5,-18+this.recoilBack[0],-5,-9);
+			line(5,-18+this.recoilBack[0],5,-9);
+			rotate(90);
+			line(-5,-18+this.recoilBack[0],5,-18+this.recoilBack[0]);
+			line(-5,-18+this.recoilBack[0],-5,-9);
+			line(5,-18+this.recoilBack[0],5,-9);
+			rotate(-45);
+			line(-5,-18+this.recoilBack[0],5,-18+this.recoilBack[0]);
+			line(-5,-18+this.recoilBack[0],-5,-9);
+			line(5,-18+this.recoilBack[0],5,-9);
+			ellipse(0,0,20,20);
+		break;
+		case "String\nTurret":
+			line(-5,-18+this.recoilBack[0],5,-18+this.recoilBack[0]);
+			line(-5,-18+this.recoilBack[0],-5,-9);
+			line(5,-18+this.recoilBack[0],5,-9);
+			line(14,0,10,-3);
+			line(14,0,10,3);
+			line(-14,0,-10,-3);
+			line(-14,0,-10,3);
+			line(0,14,-3,10);
+			line(0,14,3,10);
+			line(0,-14,-3,-10);
+			line(0,-14,3,-10);
+			arc(-9,8,10,10,15,255);
+			arc(9,8,10,10,-75,165);
+			ellipse(0,0,20,20);
+		break;
+		case "Drone\nSpawner":
+			quad(-20,-16+this.recoilBack[0],20,-16+this.recoilBack[0],12,-4,-12,-4);
+			rect(-16,-4,32,8);
+		break;
+		case "Sandwich\nTurret":
+			line(-9,-15+this.recoilBack[0]+this.recoilBack[1]+this.recoilBack[2],-7,-15+this.recoilBack[0]+this.recoilBack[1]+this.recoilBack[2]);
+			line(9,-15+this.recoilBack[0]+this.recoilBack[1]+this.recoilBack[2],7,-15+this.recoilBack[0]+this.recoilBack[1]+this.recoilBack[2]);
+			line(-9,-15+this.recoilBack[0]+this.recoilBack[1]+this.recoilBack[2],-9,-6);
+			line(9,-15+this.recoilBack[0]+this.recoilBack[1]+this.recoilBack[2],9,-6);
+			line(-7,-18+this.recoilBack[0],7,-18+this.recoilBack[0]);
+			line(-7,-18+this.recoilBack[0],-7,-8);
+			line(7,-18+this.recoilBack[0],7,-8);
+			ellipse(0,0,20,20);
+		break;
+		case "Minion\nSpawner":
+			rect(-9,-10+this.recoilBack[0],18,6-this.recoilBack[0]);
+			rect(-12,-16+this.recoilBack[0],24,6);
+			rect(-12,-4,24,8);
+		break;
+		case "Migrator\nLauncher":
+			strokeJoin(ROUND);
+			quad(-9,-17+this.recoilBack[0],9,-17+this.recoilBack[0],11,-22+this.recoilBack[0],-11,-22+this.recoilBack[0]);
+			strokeJoin(BEVEL);
+			line(-9,-17+this.recoilBack[0],-9,-6+this.recoilBack[0]);
+			line(9,-17+this.recoilBack[0],9,-6+this.recoilBack[0]);
+			line(-7,8,-4,14);
+			line(7,8,4,14);
+			line(-4,14,4,14);
+			ellipse(0,0,20,20);
+		break;
+		case "Repositioner\nLauncher":
+			strokeJoin(ROUND);
+			quad(-9,-17+this.recoilBack[0],9,-17+this.recoilBack[0],11,-22+this.recoilBack[0],-11,-22+this.recoilBack[0]);
+			strokeJoin(BEVEL);
+			line(-9,-17+this.recoilBack[0],-9,-6+this.recoilBack[0]);
+			line(9,-17+this.recoilBack[0],9,-6+this.recoilBack[0]);
+			quad(-5.5,11,5.5,11,4,14,-4,14);
+			rect(-8,14,16,3);
+			line(-9,5,-9,11);
+			line(9,5,9,11);
+			line(-9,11,9,11);
+			ellipse(0,0,20,20);
+		break;
+		case "Heavy\nMinion\nSpawner":
+			rect(-18,-14+this.recoilBack[0],36,7-this.recoilBack[0]);
+			rect(-24,-21+this.recoilBack[0],48,7);
+			rect(-24,-7,48,14);
+		break;
+		case "Bonker":
+			beginShape();
+			for(k=0;k<6;k++){
+				vertex(sin(k*60+this.countingTime*2)*18,cos(k*60+this.countingTime*2)*18);
+			}
+			endShape(CLOSE);
+			ellipse(0,0,24,24);
+		break;
+		case "Single\nTurret":
+			rect(-7,-28+this.recoilBack[0],14,10);
+			line(-7,-18+this.recoilBack[0],7,-18+this.recoilBack[0]);
+			line(7,-18+this.recoilBack[0],14,0);
+			line(-7,-18+this.recoilBack[0],-14,0);
+			ellipse(0,0,28,28);
+		break;
+		case "Destroyer\nTurret":
+			line(-15,-34+this.recoilBack[0],-15,-13);
+			line(15,-34+this.recoilBack[0],15,-13);
+			line(-15,-34+this.recoilBack[0],15,-34+this.recoilBack[0]);
+			ellipse(0,0,40,40);
+		break;
+		case "Rotator\nTurret":
+			rect(-5,-34+this.recoilBack[0],10,10);
+			line(-5,-24+this.recoilBack[0],-12,0);
+			line(0,-24+this.recoilBack[0],-3.5,-12);
+			line(5,-24+this.recoilBack[0],12,0);
+			line(0,-24+this.recoilBack[0],3.5,-12);
+			ellipse(0,0,24,24);
+		break;
+		case "5-Spread\nTurret":
+			rotate(-45);
+			line(-4,-20+this.recoilBack[0],4,-20+this.recoilBack[0]);
+			line(-4,-20+this.recoilBack[0],-4,-11);
+			line(4,-20+this.recoilBack[0],4,-11);
+			rotate(90);
+			line(-4,-20+this.recoilBack[0],4,-20+this.recoilBack[0]);
+			line(-4,-20+this.recoilBack[0],-4,-11);
+			line(4,-20+this.recoilBack[0],4,-11);
+			rotate(-22.5);
+			line(-4,-20+this.recoilBack[0],4,-20+this.recoilBack[0]);
+			line(-4,-20+this.recoilBack[0],-4,-11);
+			line(4,-20+this.recoilBack[0],4,-11);
+			rotate(-45);
+			line(-4,-20+this.recoilBack[0],4,-20+this.recoilBack[0]);
+			line(-4,-20+this.recoilBack[0],-4,-11);
+			line(4,-20+this.recoilBack[0],4,-11);
+			rotate(22.5);
+			line(-4,-20+this.recoilBack[0],4,-20+this.recoilBack[0]);
+			line(-4,-20+this.recoilBack[0],-4,-11);
+			line(4,-20+this.recoilBack[0],4,-11);
+			ellipse(0,0,24,24);
+		break;
+		case "Sapper\nDrone\nSpawner":
+			rect(-2,-12+this.recoilBack[0],4,8-this.recoilBack[0]);
+			quad(-15,-20+this.recoilBack[0],-9,-20+this.recoilBack[0],0,-4+this.recoilBack[0],-6,-4+this.recoilBack[0]);
+			quad(15,-20+this.recoilBack[0],9,-20+this.recoilBack[0],0,-4+this.recoilBack[0],6,-4+this.recoilBack[0]);
+			rect(-10,-4,20,8);
+			ellipse(sin(this.countingTime*8)*15,-8,6,6);
+		break;
+		case "5-Parellel\nTurret":
+			line(-4,-20+this.recoilBack[0],4,-20+this.recoilBack[0]);
+			line(-4,-20+this.recoilBack[0],-4,-11);
+			line(4,-20+this.recoilBack[0],4,-11);
+			line(-10,-19+this.recoilBack[0],-4,-19+this.recoilBack[0]);
+			line(10,-19+this.recoilBack[0],4,-19+this.recoilBack[0]);
+			line(-10,-19+this.recoilBack[0],-10,-8);
+			line(10,-19+this.recoilBack[0],10,-8);
+			line(-16,-18+this.recoilBack[0],-10,-18+this.recoilBack[0]);
+			line(16,-18+this.recoilBack[0],10,-18+this.recoilBack[0]);
+			line(-16,-18+this.recoilBack[0],-16,-4);
+			line(16,-18+this.recoilBack[0],16,-4);
+			ellipse(0,0,24,24);
+			triangle(-18,-4,-12,-4,-12,1);
+			triangle(18,-4,12,-4,12,1);
+		break;
+		case "Wiper\nTurret":
+			line(-7.5,-18+this.recoilBack[0],7.5,-18+this.recoilBack[0]);
+			line(-7.5,-18+this.recoilBack[0],-7.5,-10);
+			line(7.5,-18+this.recoilBack[0],7.5,-10);
+			line(-8,-10,8,-10);
+			line(-8,-10,-8,-7);
+			line(8,-10,8,-7);
+			quad(-7,-18+this.recoilBack[0],7,-18+this.recoilBack[0],3,-22+this.recoilBack[0],-3,-22+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Projectile\nFlak":
+			line(-9,-15+this.recoilBack[0],9,-15+this.recoilBack[0]);
+			line(-9,-15+this.recoilBack[0],-7,-9);
+			line(9,-15+this.recoilBack[0],7,-9);
+			line(-11,11,-10,3);
+			line(-11,11,-3,10);
+			line(11,11,10,3);
+			line(11,11,3,10);
+			ellipse(0,0,20,20);
+		break;
+		case "Bulldozer\nTurret":
+			rect(-8,-38+this.recoilBack[0],16,20-this.recoilBack[0]);
+			line(-8,-18,-7,-11);
+			line(8,-18,7,-11);
+			ellipse(0,0,24,24);
+		break;
+		case "Assasin\nTurret":
+			rect(-5,-30+this.recoilBack[0],10,15);
+			line(-5,-15+this.recoilBack[0],-10,0);
+			line(5,-15+this.recoilBack[0],10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Airscrew\nTurret":
+			rect(-5,-19+this.recoilBack[0],3,4-this.recoilBack[0]);
+			rect(2,-19+this.recoilBack[1],3,4-this.recoilBack[1]);
+			line(-5,-15,5,-15);
+			line(-5,-15,-10,0);
+			line(5,-15,10,0);
+			ellipse(0,0,20,20);
+		break;
+		case "Ferreter\nTurret":
+			line(-5,-20+this.recoilBack[0],-5,-11);
+			line(5,-20+this.recoilBack[0],5,-11);
+			line(-5,-20+this.recoilBack[0],5,-20+this.recoilBack[0]);
+			line(-11,-18+this.recoilBack[1],-11,-7);
+			line(11,-18+this.recoilBack[2],11,-7);
+			line(-11,-18+this.recoilBack[1],-5,-18+this.recoilBack[1]);
+			line(11,-18+this.recoilBack[1],5,-18+this.recoilBack[1]);
+			rect(-3,-23+this.recoilBack[0],6,3);
+			rect(-9,-21+this.recoilBack[1],6,3);
+			rect(3,-21+this.recoilBack[2],6,3);
+			ellipse(0,0,24,24);
+		break;
+		case "Decisive\nSpawner":
+			rect(-9,-10+this.recoilBack[0],18,6-this.recoilBack[0]);
+			rect(-12,-22+this.recoilBack[0],24,5);
+			quad(-12,-10+this.recoilBack[0],12,-10+this.recoilBack[0],16,-17+this.recoilBack[0],-16,-17+this.recoilBack[0]);
+			rect(-12,-4,24,8);
+		break;
+		case "Dual\nMachine\nPounder":
+			rect(-13,-32+this.recoilBack[0],12,12-this.recoilBack[0]);
+			rect(1,-32+this.recoilBack[1],12,12-this.recoilBack[1]);
+			line(-13,-20,13,-20);
+			line(-13,-20,-16,0);
+			line(13,-20,16,0);
+			ellipse(0,0,32,32);
+		break;
+		case "Impact\nShield":
+			ellipse(0,0,18,18);
+			ellipse(-10,-10,9,9);
+			ellipse(10,-10,9,9);
+			ellipse(10,10,9,9);
+			ellipse(-10,10,9,9);
+		break;
+		case "Twin\nSpawner":
+			rect(-30,-20+this.recoilBack[0],60,12-this.recoilBack[0]);
+			rect(-36,-32+this.recoilBack[0],72,12);
+			rect(-36,-8,72,16);
+		break;
+		case "Interceptor\nSpawner":
+			rect(-27,-23+this.recoilBack[0],54,14-this.recoilBack[0]);
+			rect(-32,-37+this.recoilBack[0],64,14);
+			rect(-32,-9,64,18);
+		break;
+		case "Darter\nSpawner":
+			rect(-25,-20+this.recoilBack[0],50,12-this.recoilBack[0]);
+			rect(-30,-32+this.recoilBack[0],60,12);
+			rect(-30,-8,60,16);
+		break;
+		case "Burst\nThrower":
+			line(-10,-15+this.recoilBack[0],10,-15+this.recoilBack[0]);
+			line(-10,-15+this.recoilBack[0],-7,-9);
+			line(10,-15+this.recoilBack[0],7,-9);
+			line(-10,-21+this.recoilBack[1],10,-21+this.recoilBack[1]);
+			line(-10,-21+this.recoilBack[1],-9,-15+this.recoilBack[0]);
+			line(10,-21+this.recoilBack[1],9,-15+this.recoilBack[0]);
+			ellipse(0,0,20,20);
+		break;
+		case "Octo\nTurret":
+			for(k=0;k<8;k++){
+				rect(-5,-20+this.recoilBack[0],10,8-this.recoilBack[0]);
+				rotate(45);
+			}
+			ellipse(0,0,24,24);
+		break;
+		case "Missile\nMine\nPod":
+			ellipse(0,0,18,18);
+			for(k=0;k<6;k++){
+				ellipse(0,12,8,8);
+				line(0,16,0,18);
+				rotate(60);
+			}
+		break;
+		case "SDU\nTurret":
+			rotate(-this.direction+this.countingTime*5);
+			for(k=0;k<5;k++){
+				line(0,20,-4,9);
+				line(0,20,4,9);
+				rotate(72);
+			}
+			rotate(this.direction-this.countingTime*5);
+			for(k=0;k<3;k++){
+				line(-5,-24+k*3+this.recoilBack[k],5,-24+k*3+this.recoilBack[k]);
+				line(-5,-24+k*3+this.recoilBack[k],-5,-9);
+				line(5,-24+k*3+this.recoilBack[k],5,-9);
+			}
+			ellipse(0,0,20,20);
+		break;
+		case "Close\nOrbital\nMissiles":
+			rect(-2,-9+this.recoilBack[0],4,6-this.recoilBack[0]);
+			quad(-12,-15+this.recoilBack[0],-6,-15+this.recoilBack[0],0,-3+this.recoilBack[0],-6,-3+this.recoilBack[0]);
+			quad(12,-15+this.recoilBack[0],6,-15+this.recoilBack[0],0,-3+this.recoilBack[0],6,-3+this.recoilBack[0]);
+			rect(-10,-3,20,6);
+		break;
+		case "Far\nOrbital\nMissiles":
+			rect(-2,-13+this.recoilBack[0],4,10-this.recoilBack[0]);
+			quad(-12,-15+this.recoilBack[0],-6,-15+this.recoilBack[0],0,-3,-6,-3);
+			quad(12,-15+this.recoilBack[0],6,-15+this.recoilBack[0],0,-3,6,-3);
+			rect(-10,-3,20,6);
+		break;
+		case "Swarm\nDrone\nHolder":
+			ellipse(0,0,60,60);
+			triangle(-15,9,15,9,0,-18);
+		break;
+		case "Lightning\nDrone\nSpawner":
+			quad(-15,-24+this.recoilBack[1],15,-24+this.recoilBack[1],10,-16+this.recoilBack[0],-10,-16+this.recoilBack[0]);
+			quad(-15,-16+this.recoilBack[0],15,-16+this.recoilBack[0],9,-4,-9,-4);
+			rect(-12,-4,24,8);
+		break;
+		case "Machine\nCannon":
+			quad(-12,-20+this.recoilBack[0],12,-20+this.recoilBack[0],8,-4,-8,-4);
+			rect(-11,-4,22,8);
+		break;
+		case "Smasher":
+			rotate(this.countingTime*2);
+			beginShape();
+			for(k=0;k<6;k++){
+				triangle(-2,-20,2,-20,0,-25);
+				rotate(60);
+				vertex(sin(k*60+30)*22,cos(k*60+30)*22);
+			}
+			endShape(CLOSE);
+			rotate(this.countingTime*-2);
+			ellipse(0,0,30,30);
+		break;
+		case "Hybrid\nTurret":
+			line(-7,-18+this.recoilBack[0],7,-18+this.recoilBack[0]);
+			line(-7,-18+this.recoilBack[0],-7,-8);
+			line(7,-18+this.recoilBack[0],7,-8);
+			line(-9,15-this.recoilBack[0],9,15-this.recoilBack[0]);
+			line(-9,15-this.recoilBack[0],-7,8);
+			line(9,15-this.recoilBack[0],7,8);
+			ellipse(0,0,20,20);
+		break;
+		case "Multistack\nTurret":
+			rect(-4,-26+this.recoilBack[0],8,4);
+			rect(-5.5,-22+this.recoilBack[0],11,4);
+			line(-7,-18+this.recoilBack[0],7,-18+this.recoilBack[0]);
+			line(-7,-18+this.recoilBack[0],-7,-8);
+			line(7,-18+this.recoilBack[0],7,-8);
+			ellipse(0,0,20,20);
+		break;
+		case "Chain\nCannon":
+			quad(-12,-30+this.recoilBack[0],12,-30+this.recoilBack[0],8,-4,-8,-4);
+			rect(-11,-4,22,8);
+		break;
+	}
+	rotate(-this.direction);
+	translate(-this.x,-this.y);
+}
+weapon.prototype.update = function(){
+	this.countingTime++;
+	if(this.collapsing){
+		this.fade-=17;
+	}
+	if(this.reloadTimer>0){
+		this.reloadTimer--;
+	}
+	for(k=0;k<this.recoilTimer.length;k++){
+		if(this.jamTimer>0){
+			this.jamTimer--;
+			this.recoilBack[k] = random(0,5);
+		}
+		if(this.recoilTimer[k]>0){
+			this.recoilTimer[k]--;
+			if(this.name === "Pelleter\nTurret"||this.name === "Gunner\nTurret"||this.name === "Airscrew\nTurret"||this.name === "Ferreter\nTurret"||this.name === "Burst\nThrower"||this.name === "Machine\nCannon"||this.name === "Chain\nCannon"){
+				this.recoilBack[k]++;
+			}
+			else if(this.name === "Dual\nMachine\nPounder"){
+				this.recoilBack[k]+=1.5;
+			}
+			else{
+				this.recoilBack[k]+=2;
+			}
+		}
+		if(this.recoilBack[k]>0){
+			this.recoilBack[k]-=0.05;
+		}
+	}
+}
+weapon.prototype.fire = function(baseX,baseY,baseDirection,baseId,baseColor,baseStrokeColor){
+	if(this.reloadTimer === 0){
+		this.attackCycle = false;
+	  if(this.level === 0){
+			for(var k in ships){
+				if(!this.attackCycle&&ships[k].life>0&&ships[k].team !== this.team){
+					this.attackCycle = true;
+					this.reloadTimer = this.reload;
+					this.recoilTimer[this.shotCount%this.cycle] = this.recoil;
+					if(this.behaviour === 0){
+						this.direction = atan2(ships[k].x-(cos(baseDirection)*this.x-sin(baseDirection)*this.y)-baseX,(sin(baseDirection)*this.x+cos(baseDirection)*this.y)+baseY-ships[k].y)-baseDirection;
+					}
+				}
+			}
+			if(!this.player&&!this.attackCycle&&player.life>0&&player.team !== this.team){
+				this.attackCycle = true;
+				this.reloadTimer = this.reload;
+				this.recoilTimer[this.shotCount%this.cycle] = this.recoil;
+				if(this.behaviour === 0){
+					this.direction = atan2(player.x-(cos(baseDirection)*this.x-sin(baseDirection)*this.y)-baseX,(sin(baseDirection)*this.x+cos(baseDirection)*this.y)+baseY-player.y)-baseDirection;
+				}
+			}
+			if(editorOpen&&!this.attackCycle&&player.life>0){
+				this.attackCycle = true;
+				this.reloadTimer = this.reload;
+				this.recoilTimer[this.shotCount%this.cycle] = this.recoil;
+			}
+			if(this.attackCycle){
+				projectiles.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX+cos(this.direction+baseDirection)*this.cycleSet[this.shotCount%this.cycle],sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY+sin(this.direction+baseDirection)*this.cycleSet[this.shotCount%this.cycle],this.projectileType,this.team,this.direction+baseDirection+random(-this.error,this.error),this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				if(this.name === "Sniper\nTurret"||this.name === "Silo\nTurret"||this.name === "Single\nTurret"||this.name === "Airscrew\nTurret"||this.name === "Dual\nMachine\nPounder"||this.name === "Chain\nCannon"){
+					projectiles[projectiles.length-1].speed*=1.6;
+					projectiles[projectiles.length-1].damageBoost*=1.6;
+				}
+				if(this.name === "Assasin\nTurret"){
+					projectiles[projectiles.length-1].speed*=2.25;
+					projectiles[projectiles.length-1].damageBoost*=3;
+				}
+				if(this.name === "Missile\nLauncher\nMk.I"||this.name === "Missile\nLauncher\nMk.II"||this.name === "Missile\nLauncher\nMk.III"){
+					projectiles[projectiles.length-1].explosionSizeBoost*=2.5;
+				}
+				if(this.name === "Carrier\nTurret"){
+					projectiles[projectiles.length-1].direction+=(this.shotCount%this.cycle)*45-45;
+				}
+				if(this.name === "Drone\nSpawner"||this.name === "Sapper\nDrone\nSpawner"||this.name === "Close\nOrbital\nMissiles"||this.name === "Far\nOrbital\nMissiles"||this.name === "Lightning\nDrone\nSpawner"){
+					projectiles[projectiles.length-1].keyId = baseId;
+				}
+				if(this.name === "Decisive\nSpawner"&&this.shotCount%6 === 0){
+					projectiles[projectiles.length-1] = new projectile(projectiles[projectiles.length-1].x,projectiles[projectiles.length-1].y,19,projectiles[projectiles.length-1].team,projectiles[projectiles.length-1].direction,projectiles[projectiles.length-1].color,projectiles[projectiles.length-1].strokeColor,projectiles[projectiles.length-1].level,projectiles[projectiles.length-1].firedBy,baseColor,baseStrokeColor);
+				}
+				if(this.name === "Sandwich\nTurret"){
+					if(this.shotCount%this.cycle !== 0){
+						projectiles.splice(projectiles.length-1,1);
+					}
+					projectiles.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX+cos(this.direction+baseDirection)*-7,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY+sin(this.direction+baseDirection)*-7,18,this.team,this.direction+baseDirection+random(-this.error,this.error),this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+					projectiles.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX+cos(this.direction+baseDirection)*7,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY+sin(this.direction+baseDirection)*7,18,this.team,this.direction+baseDirection+random(-this.error,this.error),this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+			}
+		}
+		else{
+			for(var k in ships){
+				if(!this.attackCycle&&(abs(this.startDirection-(atan2(ships[k].x-(cos(baseDirection)*this.x-sin(baseDirection)*this.y)-baseX,(sin(baseDirection)*this.x+cos(baseDirection)*this.y)+baseY-ships[k].y)-baseDirection))<this.variable1||abs(this.startDirection-(atan2(ships[k].x-(cos(baseDirection)*this.x-sin(baseDirection)*this.y)-baseX,(sin(baseDirection)*this.x+cos(baseDirection)*this.y)+baseY-ships[k].y)-baseDirection)+360)<this.variable1||abs(this.startDirection-(atan2(ships[k].x-(cos(baseDirection)*this.x-sin(baseDirection)*this.y)-baseX,(sin(baseDirection)*this.x+cos(baseDirection)*this.y)+baseY-ships[k].y)-baseDirection)-360)<this.variable1)&&ships[k].life>0&&ships[k].team !== this.team){
+					this.attackCycle = true;
+					this.reloadTimer = this.reload;
+					this.recoilTimer[this.shotCount%this.cycle] = this.recoil;
+					if(this.behaviour === 0){
+						this.direction = atan2(ships[k].x-(cos(baseDirection)*this.x-sin(baseDirection)*this.y)-baseX,(sin(baseDirection)*this.x+cos(baseDirection)*this.y)+baseY-ships[k].y)-baseDirection;
+					}
+				}
+			}
+			if(!this.player&&!this.attackCycle&&(abs(this.startDirection-(atan2(player.x-(cos(baseDirection)*this.x-sin(baseDirection)*this.y)-baseX,(sin(baseDirection)*this.x+cos(baseDirection)*this.y)+baseY-player.y)-baseDirection))<this.variable1||abs(this.startDirection-(atan2(player.x-(cos(baseDirection)*this.x-sin(baseDirection)*this.y)-baseX,(sin(baseDirection)*this.x+cos(baseDirection)*this.y)+baseY-player.y)-baseDirection)+360)<this.variable1||abs(this.startDirection-(atan2(player.x-(cos(baseDirection)*this.x-sin(baseDirection)*this.y)-baseX,(sin(baseDirection)*this.x+cos(baseDirection)*this.y)+baseY-player.y)-baseDirection)-360)<this.variable1)&&player.life>0&&player.team !== this.team){
+				this.attackCycle = true;
+				this.reloadTimer = this.reload;
+				this.recoilTimer[this.shotCount%this.cycle] = this.recoil;
+				if(this.behaviour === 0){
+					this.direction = atan2(player.x-(cos(baseDirection)*this.x-sin(baseDirection)*this.y)-baseX,(sin(baseDirection)*this.x+cos(baseDirection)*this.y)+baseY-player.y)-baseDirection;
+				}
+			}
+			for(k in ships){
+				if(editorOpen&&!this.attackCycle&&player.life>0&&this.team !== ships[k].team){
+					this.attackCycle = true;
+					this.reloadTimer = this.reload;
+					this.recoilTimer[this.shotCount%this.cycle] = this.recoil;
+				}
+			}
+			if(editorOpen&&!this.attackCycle&&player.life>0){
+				this.attackCycle = true;
+				this.reloadTimer = this.reload;
+				this.recoilTimer[this.shotCount%this.cycle] = this.recoil;
+			}
+			if(this.attackCycle){
+				projectiles2.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX+cos(this.direction+baseDirection)*this.cycleSet[this.shotCount%this.cycle],sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY+sin(this.direction+baseDirection)*this.cycleSet[this.shotCount%this.cycle],this.projectileType,this.team,this.direction+baseDirection+random(-this.error,this.error),this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				if(this.name === "Sniper\nTurret"||this.name === "Silo\nTurret"||this.name === "Single\nTurret"||this.name === "Airscrew\nTurret"||this.name === "Dual\nMachine\nPounder"||this.name === "Chain\nCannon"){
+					projectiles2[projectiles2.length-1].speed*=1.6;
+					projectiles2[projectiles2.length-1].damageBoost*=1.6;
+				}
+				if(this.name === "Assasin\nTurret"){
+					projectiles2[projectiles2.length-1].speed*=2.25;
+					projectiles2[projectiles2.length-1].damageBoost*=3;
+				}
+				if(this.name === "Missile\nLauncher\nMk.I"||this.name === "Missile\nLauncher\nMk.II"||this.name === "Missile\nLauncher\nMk.III"){
+					projectiles2[projectiles2.length-1].explosionSizeBoost*=2.5;
+				}
+				if(this.name === "Carrier\nTurret"){
+					projectiles2[projectiles2.length-1].direction+=(this.shotCount%this.cycle)*45-45;
+				}
+				if(this.name === "Drone\nSpawner"||this.name === "Sapper\nDrone\nSpawner"||this.name === "Close\nOrbital\nMissiles"||this.name === "Far\nOrbital\nMissiles"||this.name === "Lightning\nDrone\nSpawner"){
+					projectiles2[projectiles2.length-1].keyId = baseId;
+				}
+				if(this.name === "Decisive\nSpawner"&&this.shotCount%6 === 0){
+					projectiles2[projectiles2.length-1] = new projectile(projectiles2[projectiles2.length-1].x,projectiles2[projectiles2.length-1].y,19,projectiles2[projectiles2.length-1].team,projectiles2[projectiles2.length-1].direction,projectiles2[projectiles2.length-1].color,projectiles2[projectiles2.length-1].strokeColor,projectiles2[projectiles2.length-1].level,projectiles2[projectiles2.length-1].firedBy,baseColor,baseStrokeColor);
+				}
+				if(this.name === "Sandwich\nTurret"){
+					if(this.shotCount%this.cycle !== 0){
+						projectiles2.splice(projectiles2.length-1,1);
+					}
+					projectiles2.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX+cos(this.direction+baseDirection)*-7,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY+sin(this.direction+baseDirection)*-7,18,this.team,this.direction+baseDirection+random(-this.error,this.error),this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+					projectiles2.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX+cos(this.direction+baseDirection)*7,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY+sin(this.direction+baseDirection)*7,18,this.team,this.direction+baseDirection+random(-this.error,this.error),this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+			}
+		}
+		if(this.attackCycle){
+			this.shotCount++;
+			if(this.name === "String\nTurret"&&this.shotCount%10 !== 0){
+				this.reloadTimer = 10;
+				this.recoilBack[0] = 0;
+			}
+			else if(this.name === "Missile\nLauncher\nMk.II"&&this.shotCount%3 !== 0||this.name === "Missile\nLauncher\nMk.III"&&this.shotCount%9 !== 0){
+				this.reloadTimer = 3;
+			}
+			else if(this.name === "Rotator\nTurret"&&this.shotCount%10 !== 0){
+				this.reloadTimer = 5;
+				this.recoilBack[0] = 0;
+				this.direction+=10;
+				if(this.direction>360){
+					this.direction-=360;
+				}
+			}
+		}
+	}
+}
+weapon.prototype.secondary = function(baseX,baseY,baseDirection,baseId,baseColor,baseStrokeColor){
+	switch(this.name){
+		case "SDU\nTurret":
+			if(this.level === 0){
+				for(k=0;k<10;k++){
+					projectiles.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,38,this.team,this.direction+baseDirection+k*36,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+			}
+			else{
+				for(k=0;k<10;k++){
+					projectiles2.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,38,this.team,this.direction+baseDirection+k*36,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+			}
+		break;
+		case "Swarm\nDrone\nHolder":
+			if(this.level === 0){
+				for(k=0;k<10;k++){
+					projectiles.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,9,this.team,this.direction+baseDirection+k*36,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+				for(k=0;k<5;k++){
+					projectiles.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,19,this.team,this.direction+baseDirection+k*72,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+				for(k=0;k<5;k++){
+					projectiles.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,20,this.team,this.direction+baseDirection+k*72+36,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+				for(k=0;k<10;k++){
+					projectiles.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,23,this.team,this.direction+baseDirection+k*36+18,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+				projectiles.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,24,this.team,this.direction+baseDirection,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+			}
+			else{
+				for(k=0;k<10;k++){
+					projectiles2.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,9,this.team,this.direction+baseDirection+k*36,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+				for(k=0;k<5;k++){
+					projectiles2.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,19,this.team,this.direction+baseDirection+k*72,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+				for(k=0;k<5;k++){
+					projectiles2.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,20,this.team,this.direction+baseDirection+k*72+36,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+				for(k=0;k<10;k++){
+					projectiles2.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,23,this.team,this.direction+baseDirection+k*36+18,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+				}
+				projectiles2.push(new projectile(cos(baseDirection)*this.x-sin(baseDirection)*this.y+baseX,sin(baseDirection)*this.x+cos(baseDirection)*this.y+baseY,24,this.team,this.direction+baseDirection,this.color,this.strokeColor,this.level,this.type,baseColor,baseStrokeColor));
+			}
+		break;
+	}
+}

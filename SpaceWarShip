@@ -1,0 +1,369 @@
+ship = function(x,y,model,team,direction,player,color,strokeColor,weaponColor,weaponStrokeColor){
+	this.x = x;
+	this.y = y;
+	this.holdX = this.x;
+	this.holdY = this.y;
+	this.model = model;
+	this.team = team;
+	this.direction = direction;
+	this.player = player;
+	this.color = color;
+	this.strokeColor = strokeColor;
+	this.weaponColor = weaponColor;
+	this.weaponStrokeColor = weaponStrokeColor;
+	this.firing = false;
+	this.pieces = [];
+	this.modules = [];
+	this.weapons = [];
+	this.lowerWeapons = [];
+	this.hitBoxes = [];
+	this.initialActivation = 0;
+	this.engineActivation = 0;
+	this.enginePowerX = 0;
+	this.enginePowerY = 0;
+	this.totalMass = 0;
+	this.ammunitionSupply = [0];
+	this.totalAmmunitionContained = 0;
+	this.totalAmmunitionStorage = 0;
+	this.speedX = 0;
+	this.speedY = 0;
+	this.speed = 0;
+	this.countingTime = 0;
+	this.turningValue = 0;
+	this.finalizedDirection = 0;
+	this.lastDamage = "Unknown Effect";
+	this.name = shipPresets[this.model].name;
+	this.life = shipPresets[this.model].life;
+	this.behaviour = shipPresets[this.model].behaviour;
+	this.unique = shipPresets[this.model].unique;
+	this.maxLife = this.life;
+	this.preLife = this.life;
+	this.lifeFade = 255;
+	this.primaryFade = 0;
+	this.collapsing = false;
+	this.id = countingId;
+	this.targetDirection = 0;
+	countingId++;
+	for(var i in shipPresets[this.model].pieces){
+		this.pieces.push(new piece(shipPresets[this.model].pieces[i][0],shipPresets[this.model].pieces[i][1],shipPresets[this.model].pieces[i][2],shipPresets[this.model].pieces[i][3],this.player,shipPresets[this.model].pieces[i][4],shipPresets[this.model].pieces[i][5],this.color,this.strokeColor));
+	}
+	for(i in shipPresets[this.model].modules){
+		this.modules.push(new module(shipPresets[this.model].modules[i][0],shipPresets[this.model].modules[i][1],shipPresets[this.model].modules[i][2],shipPresets[this.model].modules[i][3],this.player));
+		if(this.modules[this.modules.length-1].name === "Magazine"||this.modules[this.modules.length-1].name === "Ammo Belt"||this.modules[this.modules.length-1].name === "Ammo Box"||this.modules[this.modules.length-1].name === "Industrial\nContainer"||this.modules[this.modules.length-1].name === "Warehouse"||this.modules[this.modules.length-1].name === "Industrial\nStreet"){
+			this.totalAmmunitionStorage+=moduleTypes[this.modules[this.modules.length-1].type].storage;
+		}
+	}
+	for(i in shipPresets[this.model].weapons){
+		if(shipPresets[this.model].weapons[i][4] === 0){
+			this.weapons.push(new weapon(shipPresets[this.model].weapons[i][0],shipPresets[this.model].weapons[i][1],shipPresets[this.model].weapons[i][2],this.team,shipPresets[this.model].weapons[i][3],this.player,this.weaponColor,this.weaponStrokeColor,shipPresets[this.model].weapons[i][4],shipPresets[this.model].weapons[i][5]));
+			this.totalAmmunitionMass+=weaponTypes[this.weapons[this.weapons.length-1].type].storage;
+			for(var j in weaponTypes[this.weapons[this.weapons.length-1].type].ammunitionStorage){
+				this.ammunitionSupply[weaponTypes[this.weapons[this.weapons.length-1].type].ammunitionStorage[j][0]]+=weaponTypes[this.weapons[this.weapons.length-1].type].ammunitionStorage[j][1];
+				this.totalAmmunitionContained+=ammunitionTypes[weaponTypes[this.weapons[this.weapons.length-1].type].ammunitionStorage[j][0]].storage*weaponTypes[this.weapons[this.weapons.length-1].type].ammunitionStorage[j][1];
+			}
+		}
+		else{
+			this.lowerWeapons.push(new weapon(shipPresets[this.model].weapons[i][0],shipPresets[this.model].weapons[i][1],shipPresets[this.model].weapons[i][2],this.team,shipPresets[this.model].weapons[i][3],this.player,this.weaponColor,this.weaponStrokeColor,shipPresets[this.model].weapons[i][4],shipPresets[this.model].weapons[i][5]));
+			this.totalAmmunitionMass+=weaponTypes[this.lowerWeapons[this.lowerWeapons.length-1].type].storage;
+			for(var j in weaponTypes[this.lowerWeapons[this.lowerWeapons.length-1].type].ammunitionStorage){
+				this.ammunitionSupply[weaponTypes[this.lowerWeapons[this.lowerWeapons.length-1].type].ammunitionStorage[j][0]]+=weaponTypes[this.lowerWeapons[this.lowerWeapons.length-1].type].ammunitionStorage[j][1];
+				this.totalAmmunitionContained+=ammunitionTypes[weaponTypes[this.lowerWeapons[this.lowerWeapons.length-1].type].ammunitionStorage[j][0]].storage*weaponTypes[this.lowerWeapons[this.lowerWeapons.length-1].type].ammunitionStorage[j][1];
+			}
+		}
+	}
+	for(i=0;i<shipPresets[this.model].hitBoxes.length;i++){
+		this.hitBoxes.push(shipPresets[this.model].hitBoxes[i]);
+	}
+}
+ship.prototype.draw1 = function(){
+	translate(this.x,this.y);
+	rotate(this.direction);
+	for(var k in this.lowerWeapons){
+		this.lowerWeapons[k].draw(this.primaryFade);
+	}
+	for(k in this.pieces){
+		this.pieces[k].draw(this.primaryFade);
+	}
+	for(k in this.modules){
+		this.modules[k].draw(this.primaryFade,this.engineActivation,this.turningValue,[this.color[0]*4/5,this.color[1]*4/5,this.color[2]*4/5],[this.strokeColor[0]*4/5,this.strokeColor[1]*4/5,this.strokeColor[2]*4/5]);
+	}
+	rotate(-this.direction);
+	translate(-this.x,-this.y);
+	stroke(255,0,0);
+	strokeWeight(3);
+}
+ship.prototype.draw2 = function(){
+	translate(this.x,this.y);
+	rotate(this.direction);
+	for(var k in this.weapons){
+		this.weapons[k].draw(this.primaryFade,this.unique);
+	}
+	rotate(-this.direction);
+	translate(-this.x,-this.y);
+}
+ship.prototype.drawLife = function(){
+	if(this.unique !== 3){
+		translate(this.x,this.y);
+		noStroke();
+		fill(75,this.lifeFade*this.primaryFade);
+		rect(-23,-40,46,8);
+		fill(300-max(0,this.life)/this.maxLife*300,-100+max(0,this.life)/this.maxLife*355,0,this.lifeFade*this.primaryFade);
+		rect(-23,-40,(max(0,this.life)/this.maxLife)*46,8);
+		fill(0,this.lifeFade*this.primaryFade);
+		textSize(8);
+		text(ceil(max(0,this.life))+"/"+ceil(this.maxLife),0,-35);
+		translate(-this.x,-this.y);
+	}
+}
+ship.prototype.update = function(){
+	this.countingTime++;
+	if(this.life<=0){
+		if(!this.collapsing){
+			this.collapsing = true;
+			if(this.player){
+				messageCache.push(["You were defeated by a "+this.lastDamage,900]);
+			}
+			else{
+				messageCache.push(["A "+this.name+" was defeated by a "+this.lastDamage,900]);
+			}
+			for(var k in this.lowerWeapons){
+				if(this.lowerWeapons[k].type === 52){
+					this.lowerWeapons[k].collapsing = true;
+					this.lowerWeapons[k].fire(this.x,this.y,this.direction,this.id,this.color,this.strokeColor);
+				}
+			}
+			for(k in this.weapons){
+				if(this.weapons[k].type === 52){
+					this.weapons[k].collapsing = true;
+					this.weapons[k].fire(this.x,this.y,this.direction,this.id,this.color,this.strokeColor);
+				}
+			}
+		}
+		this.lifeFade-=17;
+		for(var k in this.pieces){
+			if(floor(random(0,30)) === 0&&!this.pieces[k].collapsing){
+				this.pieces[k].collapsing = true;
+				particles.push(new particle((cos(this.direction)*this.pieces[k].x-sin(this.direction)*this.pieces[k].y)+this.x,(sin(this.direction)*this.pieces[k].x+cos(this.direction)*this.pieces[k].y)+this.y,0,0,sqrt(this.pieces[k].width**2+this.pieces[k].height**2)/2*sqrt(pieceTypes[this.pieces[k].type].massMulti),1,[255,170,0],[255,85,0]));
+			}
+		}
+		for(k in this.modules){
+			if(floor(random(0,30)) === 0&&!this.modules[k].collapsing){
+				this.modules[k].collapsing = true;
+				particles.push(new particle((cos(this.direction)*this.modules[k].x-sin(this.direction)*this.modules[k].y)+this.x,(sin(this.direction)*this.modules[k].x+cos(this.direction)*this.modules[k].y)+this.y,0,0,sqrt(this.modules[k].width**2+this.modules[k].height**2)/3,1,[255,170,0],[255,85,0]));
+			}
+		}
+		for(k in this.weapons){
+			if(floor(random(0,30)) === 0&&!this.weapons[k].collapsing){
+				this.weapons[k].collapsing = true;
+				particles.push(new particle((cos(this.direction)*this.weapons[k].x-sin(this.direction)*this.weapons[k].y)+this.x,(sin(this.direction)*this.weapons[k].x+cos(this.direction)*this.weapons[k].y)+this.y,0,0,sqrt(this.weapons[k].width**2+this.weapons[k].height**2)/2,1,[255,170,0],[255,85,0]));
+			}
+		}
+		for(k in this.lowerWeapons){
+			if(floor(random(0,30)) === 0&&!this.lowerWeapons[k].collapsing){
+				this.lowerWeapons[k].collapsing = true;
+				particles.push(new particle((cos(this.direction)*this.lowerWeapons[k].x-sin(this.direction)*this.lowerWeapons[k].y)+this.x,(sin(this.direction)*this.lowerWeapons[k].x+cos(this.direction)*this.lowerWeapons[k].y)+this.y,0,0,sqrt(this.lowerWeapons[k].width**2+this.lowerWeapons[k].height**2)/2,1,[255,170,0],[255,85,0]));
+			}
+		}
+	}
+	this.holdX = this.x;
+	this.holdY = this.y;
+	this.enginePowerX = 0;
+	this.enginePowerY = 0;
+	this.totalMass = 0;
+	for(var i in this.pieces){
+		this.totalMass+=this.pieces[i].width*this.pieces[i].height*pieceTypes[this.pieces[i].type].massMulti/20;
+	}
+	for(i in this.modules){
+		this.totalMass+=moduleTypes[this.modules[i].type].mass;
+	}
+	for(i in this.weapons){
+		this.totalMass+=weaponTypes[this.weapons[i].type].mass;
+	}
+	for(i in this.lowerWeapons){
+		this.totalMass+=weaponTypes[this.lowerWeapons[i].type].mass;
+	}
+	for(var k in this.modules){
+		if(this.modules[k].name === "Thruster\nTiny"||this.modules[k].name === "Thruster\nSmall"||this.modules[k].name === "Thruster\nMedium"||this.modules[k].name === "Thruster\nLarge"||this.modules[k].name === "Thruster\nThick"||this.modules[k].name === "Thruster\nExtended"){
+			this.enginePowerX+=moduleTypes[this.modules[k].type].power*sin(this.modules[k].direction);
+			this.enginePowerY+=moduleTypes[this.modules[k].type].power*-cos(this.modules[k].direction);
+		}
+	}
+	this.speedX = this.engineActivation*this.enginePowerX*400/this.totalMass;
+	this.speedY = this.engineActivation*this.enginePowerY*400/this.totalMass;
+	this.speed = sqrt(this.speedX**2+this.speedY**2);
+	this.direction+=this.turningValue*this.speed/12;
+	if(this.direction<0){
+		this.direction+=360;
+	}
+	else if(this.direction>360){
+		this.direction-=360;
+	}
+	this.finalizedDirection = this.direction+atan2(this.speedX,-this.speedY);
+	this.x+=sin(this.finalizedDirection)*this.speed;
+	this.y-=cos(this.finalizedDirection)*this.speed;
+	for(k in this.pieces){
+		this.pieces[k].update();
+	}
+	for(k in this.modules){
+		this.modules[k].update();
+	}
+	for(k in this.weapons){
+		this.weapons[k].update();
+	}
+	for(k in this.lowerWeapons){
+		this.lowerWeapons[k].update();
+	}
+	if(this.firing&&this.life>0&&this.primaryFade>=1){
+		for(k in this.lowerWeapons){
+			if(!(this.lowerWeapons[k].type === 47&&this.preLife === this.life)&&this.lowerWeapons[k].type !== 52&&this.lowerWeapons[k].type !== 56&&!this.lowerWeapons[k].collapsing){
+				this.lowerWeapons[k].fire(this.x,this.y,this.direction,this.id,this.color,this.strokeColor);
+			}
+		}
+		for(k in this.weapons){
+			if(!(this.weapons[k].type === 47&&this.preLife === this.life)&&this.weapons[k].type !== 52&this.weapons[k].type !== 56&&!this.weapons[k].collapsing){
+				this.weapons[k].fire(this.x,this.y,this.direction,this.id,this.color,this.strokeColor);
+			}
+		}
+	}
+	this.firing = false;
+	if(this.preLife>=this.maxLife/5&&this.life<this.maxLife/5&&this.player){
+		messageFadeBoostTimer = 15;
+		message = "You are beat up";
+	}
+	if(this.preLife>=this.maxLife/2&&this.life<this.maxLife/2){
+		for(k in this.lowerWeapons){
+			if(this.lowerWeapons[k].type === 53||this.lowerWeapons[k].type === 56){
+				this.lowerWeapons[k].collapsing = true;
+				this.lowerWeapons[k].secondary(this.x,this.y,this.direction,this.id,this.color,this.strokeColor);
+			}
+		}
+		for(k in this.weapons){
+			if(this.weapons[k].type === 53||this.weapons[k].type === 56){
+				this.weapons[k].collapsing = true;
+				this.weapons[k].secondary(this.x,this.y,this.direction,this.id,this.color,this.strokeColor);
+			}
+		}
+	}
+	for(k in ships){
+		if(dist(this.x,this.y,ships[k].x,ships[k].y)<400){
+			this.firing = true;
+		}
+	}
+	if(this.player){
+		this.firing = true;
+	}
+	if(!this.firing&&!this.player&&dist(this.x,this.y,player.x,player.y)<400){
+		this.firing = true;
+	}
+	if(this.behaviour !== 0){
+		if(this.player){
+			if((specialKeys[2]||keys[2])&&this.initialActivation<180){
+				this.initialActivation++;
+			}
+			if((specialKeys[3]||keys[3])&&this.initialActivation>0){
+				this.initialActivation--;
+			}
+			if((specialKeys[1]||keys[1])&&this.turningValue<24){
+				this.turningValue+=0.2;
+			}
+			if((specialKeys[0]||keys[0])&&this.turningValue>-24){
+				this.turningValue-=0.2;
+			}
+		}
+		else{
+			if(this.behaviour === 1&&(dist(this.x,this.y,player.x,player.y)<900&&this.unique !== 1||dist(this.x,this.y,player.x,player.y)<300)||this.behaviour === 4&&dist(this.x,this.y,player.x,player.y)<900&&dist(this.x,this.y,player.x,player.y)>150){
+				this.targetDirection = atan2(player.x-this.x,this.y-player.y);
+				if(this.initialActivation<180){
+					this.initialActivation++;
+				}
+				if(this.direction>this.targetDirection-185&&this.direction<this.targetDirection||this.direction>this.targetDirection+175&&this.direction<this.targetDirection+365||this.direction>this.targetDirection-545&&this.direction<this.targetDirection-355){
+					this.turningValue+=0.2;
+				}
+				if(this.direction<this.targetDirection+185&&this.direction>this.targetDirection||this.direction<this.targetDirection+545&&this.direction>this.targetDirection+355||this.direction<this.targetDirection-175&&this.direction>this.targetDirection-365){
+					this.turningValue-=0.2;
+				}
+			}
+			else if(this.behaviour === 2&&dist(this.x,this.y,player.x,player.y)<450||this.behaviour === 4&&dist(this.x,this.y,player.x,player.y)<=150){
+				this.targetDirection = atan2(player.x-this.x,this.y-player.y)+180;
+				if(this.initialActivation<180){
+					this.initialActivation++;
+				}
+				if(this.direction>this.targetDirection-180&&this.direction<this.targetDirection||this.direction>this.targetDirection+180&&this.direction<this.targetDirection+360||this.direction>this.targetDirection-540&&this.direction<this.targetDirection-360){
+					this.turningValue+=0.2;
+				}
+				if(this.direction<this.targetDirection+180&&this.direction>this.targetDirection||this.direction<this.targetDirection+540&&this.direction>this.targetDirection+360||this.direction<this.targetDirection-180&&this.direction>this.targetDirection-360){
+					this.turningValue-=0.2;
+				}
+			}
+			else if(this.behaviour === 3&&dist(this.x,this.y,player.x,player.y)<900){
+				if(this.countingTime%120 === 0){
+					this.targetDirection = atan2(player.x+random(-150,150)-this.x,this.y-player.y+random(-150,150));
+				}
+				if(this.initialActivation<180){
+					this.initialActivation++;
+				}
+				if(this.direction>this.targetDirection-180&&this.direction<this.targetDirection||this.direction>this.targetDirection+180&&this.direction<this.targetDirection+360||this.direction>this.targetDirection-540&&this.direction<this.targetDirection-360){
+					this.turningValue+=0.2;
+				}
+				if(this.direction<this.targetDirection+180&&this.direction>this.targetDirection||this.direction<this.targetDirection+540&&this.direction>this.targetDirection+360||this.direction<this.targetDirection-180&&this.direction>this.targetDirection-360){
+					this.turningValue-=0.2;
+				}
+			}
+			else if(this.behaviour === 5){
+				this.targetDirection = atan2(player.x-this.x,this.y-player.y);
+				for(k in ships){
+					if(ships[k].behaviour === 5){
+						if(dist(this.x,this.y,ships[k].x,ships[k].y)<50&&dist(this.x,this.y,ships[k].x,ships[k].y)>1){
+							this.targetDirection = atan2(ships[k].x-this.x,this.y-ships[k].y)+180;
+						}
+						else if(dist(this.x,this.y,ships[k].x,ships[k].y)>100&&dist(this.x,this.y,ships[k].x,ships[k].y)<200){
+							this.targetDirection = atan2(ships[k].x-this.x,this.y-ships[k].y);
+						}
+						else if(dist(this.x,this.y,ships[k].x,ships[k].y)<=100&&dist(this.x,this.y,ships[k].x,ships[k].y)>1){
+							this.targetDireciton = ships[k].direction;
+						}
+					}
+				}
+				this.direction+=this.turningValue*this.speed/12;
+				if(this.initialActivation<180){
+					this.initialActivation++;
+				}
+				if(this.direction>this.targetDirection-180&&this.direction<this.targetDirection||this.direction>this.targetDirection+180&&this.direction<this.targetDirection+360||this.direction>this.targetDirection-540&&this.direction<this.targetDirection-360){
+					this.turningValue+=0.2;
+				}
+				if(this.direction<this.targetDirection+180&&this.direction>this.targetDirection||this.direction<this.targetDirection+540&&this.direction>this.targetDirection+360||this.direction<this.targetDirection-180&&this.direction>this.targetDirection-360){
+					this.turningValue-=0.2;
+				}
+			}
+		}
+	}
+	if(this.unique === 1){
+		if(this.initialActivation<0.25){
+			this.firing = false;
+			if(this.primaryFade>0){
+				this.primaryFade-=1/60;
+			}
+		}
+		else if(this.initialActivation>0.25){
+			this.firing = true;
+			if(this.primaryFade<1){
+				this.primaryFade+=1/60;
+			}
+		}
+	}
+	else if(this.unique === 3){
+		this.life = this.maxLife;
+	}
+	if(this.primaryFade<1&&this.unique !== 1){
+		this.primaryFade+=1/30;
+		if(this.primaryFade>1){
+			this.primaryFade = 1;
+		}
+	}
+	this.turningValue = this.turningValue*0.95;
+	this.engineActivation = 1-cos(this.initialActivation/2);
+	if(this.life<=0){
+		this.initialActivation*=0.95;
+	}
+	this.preLife = this.life;
+}

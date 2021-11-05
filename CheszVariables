@@ -1,0 +1,30 @@
+board = [
+	[24,22,23,26,27,23,22,24],
+	[21,21,21,21,21,21,21,21],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[1,1,1,1,1,1,1,1],
+	[4,2,3,6,7,3,2,4],
+];
+selectedPiece = [-1,0];
+turn = 0;
+checkValue = [0,0];
+french = [[false,false,false,false,false,false,false,false],[false,false,false,false,false,false,false,false]];
+castle = [[true,true],[true,true]];
+time = [0,0];
+takenPieces = [[],[]];
+takenMaterial = [0,0];
+pieceValues = [0,1,3,3,5,7,9,100,4,1,1,3,8];
+pieceNames = ["","P","N","B","R","NB","Q","K","HFD","W","A","WA","WNB","","","","","","","","","P","N","B","R","NB","Q","K","HFD","W","A","WA","WNB"];
+promoteTo = 6;
+files = "ABCDEFGHIJ";
+move = 0;
+moveText = [];
+scene = "edit";
+promoteNames = ["Nothing","Pawn","Knight","Bishop","Rook","Princess","Queen","King","Half Duck","Wazir","Alfil","Waffle","Crown\nPrincess"];
+options = [true,true,true];
+timeNumber = 4;
+timeValues = [1800,3600,7200,18000,36000,72000,108000,216000,777777];
+timeNames = ["30 Seconds","1 Minute","2 Minutes","5 Minutes","10 Minutes","20 Minutes","30 Minutes","1 Hour","Undefined"];

@@ -1,0 +1,13 @@
+setup = function(){
+	createCanvas(600,600);
+	textAlign(CENTER,CENTER);
+	textLeading(7);
+	angleMode(DEGREES);
+	strokeJoin(BEVEL);
+	z = floor(random(0,shipPresets.length));
+	z = 6;
+	player = new ship(0,0,z,0,0,true,shipPresets[z].color,shipPresets[z].strokeColor,shipPresets[z].weaponColor,shipPresets[z].weaponStrokeColor);
+	for(i=0;i<1;i++){
+		z = floor(random(0,shipPresets.length));
+	}
+}

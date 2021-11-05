@@ -1,0 +1,186 @@
+draw = function(){
+	background(100);
+	if(scene === "edit"){
+		noStroke();
+		fill(200);
+		rect(60,90,90,60,5);
+		rect(285,90,90,60,5);
+		rect(510,90,90,60,5);
+		rect(60,180,90,60,5);
+		rect(285,180,90,60,5);
+		rect(510,180,90,60,5);
+		rect(285,270,90,60,5);
+		rect(285,360,90,60,5);
+		fill(0);
+		textSize(50);
+		text("Chesz",330,40);
+		textSize(15);
+		text("By Ducky Programming",330,75);
+		if(options[0]){
+			text("En\nPassant",105,210);
+		}
+		else{
+			text("No En\nPassant",105,210);
+		}
+		if(options[1]){
+			text("Castling\nAllowed",330,210);
+		}
+		else{
+			text("Castling\nDisallowed",330,210);
+		}
+		if(options[2]){
+			text("Any\nCastling",555,210);
+		}
+		else{
+			text("Opposite Side\nCastling",555,210);
+		}
+		text(board[0].length+"x8\nBoard",105,120);
+		text("Edit\nBoard",330,120);
+		text("Promote to\n"+promoteNames[promoteTo],555,120);
+		text(timeNames[timeNumber]+"\nTime",330,300);
+		text("Play",330,390);
+	}
+	else if(scene === "variate"){
+		stroke(0);
+		strokeWeight(1);
+		fill(60);
+		rect(600,-15,75,630);
+		for(var i=0;i<board[0].length;i++){
+			for(var j=0;j<board.length;j++){
+				if(selectedPiece[0] === i&&selectedPiece[1] === j){
+					fill(255,80,80);
+				}
+				else if((i+j)%2 === 0){
+					fill(239,239,239);
+				}
+				else{
+					fill(194,215,226);
+				}
+				rect(300-board[0].length*30+i*60,300-board.length*30+j*60,60,60);
+				if(imageHold[board[j][i]] !== 0){
+					image(imageHold[board[j][i]],330-board[0].length*30+i*60,330-board.length*30+j*60,55,55);
+				}
+			}
+		}
+		noStroke();
+		fill(200);
+		rect(10,10,40,40,5);
+		for(i=0;i<promoteNames.length;i++){
+			rect(610,10+i*35,40,30,5);
+		}
+		if(selectedPiece[0] !== -1){
+			fill(0,50);
+			if(board[selectedPiece[1]][selectedPiece[0]]>20){
+				turn = 1;
+			}
+			else{
+				turn = 0;
+			}
+			for(i=0;i<board[0].length;i++){
+				for(var j=0;j<board.length;j++){
+					if(moveLegal(selectedPiece[0],selectedPiece[1],i,j,board[selectedPiece[1]][selectedPiece[0]],true)){
+						ellipse(330-board[0].length*30+i*60,330-board.length*30+j*60,30,30);
+					}
+				}
+			}
+		}
+		fill(0);
+		textSize(10);
+		text("Return",30,30);
+		for(i=0;i<promoteNames.length;i++){
+			text(promoteNames[i],630,25+i*35);
+		}
+	}
+	else if(scene === "play"){
+		stroke(0);
+		strokeWeight(1);
+		fill(60);
+		rect(600,-15,75,630);
+		for(var i in takenPieces[0]){
+			image(imageHold[takenPieces[0][i]],50+i*20,570,40,40);
+		}
+		for(i in takenPieces[1]){
+			image(imageHold[takenPieces[1][i]],550-i*20,570,40,40);
+		}
+		for(i=0;i<board[0].length;i++){
+			for(var j=0;j<board.length;j++){
+				if(board[j][i] === 1&&j === 0){
+					board[j][i] = promoteTo;
+				}
+				else if(board[j][i] === 21&&j === board.length-1){
+					board[j][i] = promoteTo+20;
+				}
+				if(selectedPiece[0] === i&&selectedPiece[1] === j){
+					fill(255,80,80);
+				}
+				else if((i+j)%2 === 0){
+					fill(239,239,239);
+				}
+				else{
+					fill(194,215,226);
+				}
+				rect(300-board[0].length*30+i*60,300-board.length*30+j*60,60,60);
+				if(imageHold[board[j][i]] !== 0){
+					image(imageHold[board[j][i]],330-board[0].length*30+i*60,330-board.length*30+j*60,55,55);
+				}
+			}
+		}
+		fill(200);
+		rect(60,10,120,40,5);
+		fill(0);
+		rect(420,10,120,40,5);
+		if(selectedPiece[0] !== -1){
+			fill(0,50);
+			noStroke();
+			for(i=0;i<board[0].length;i++){
+				for(var j=0;j<board.length;j++){
+					if(moveLegal(selectedPiece[0],selectedPiece[1],i,j,board[selectedPiece[1]][selectedPiece[0]],true)){
+						ellipse(330-board[0].length*30+i*60,330-board.length*30+j*60,30,30);
+					}
+				}
+			}
+		}
+		noStroke();
+		textSize(10);
+		for(i in moveText){
+			if(i%2 === 0){
+				fill(255);
+			}
+			else{
+				fill(0);
+			}
+			text(moveText[i],630,10+i*10);
+		}
+		fill(0);
+		for(i=0;i<board.length;i++){
+			text(board.length-i,max(5,294-board[0].length*30),330-board.length*30+i*60);
+		}
+		for(i=0;i<board[0].length;i++){
+			text(files[i],330+i*60-board[0].length*30,308+board.length*30);
+		}
+		textSize(25);
+		if(floor(time[0]/60)%60<10){
+			text(floor(time[0]/3600)+":0"+floor(time[0]/60)%60,120,30);
+		}
+		else{
+			text(floor(time[0]/3600)+":"+floor(time[0]/60)%60,120,30);
+		}
+		if(turn === 0){
+			text("White to Move",300,30);
+			time[0]--;
+		}
+		else{
+			text("Black to Move",300,30);
+			time[1]--;
+		}
+		fill(255);
+		if(floor(time[1]/60)%60<10){
+			text(floor(time[1]/3600)+":0"+floor(time[1]/60)%60,480,30);
+		}
+		else{
+			text(floor(time[1]/3600)+":"+floor(time[1]/60)%60,480,30);
+		}
+		text(takenMaterial[0],20,570);
+		text(takenMaterial[1],580,570);
+	}
+}

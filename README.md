@@ -1,4 +1,4 @@
-Hayden Qi, known online as DuckyProgramming, develops games online.
+I, Hayden Qi, known online as DuckyProgramming, am a solo game developer.
 
 Most of my modern work is available on GitHub. Playable versions can also be found on OpenProcessing:
 https://openprocessing.org/user/136141/?view=sketches#sketches
